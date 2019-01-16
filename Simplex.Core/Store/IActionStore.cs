@@ -54,8 +54,8 @@ namespace Tmon.Simplex.Store
             where TAction : IAction<TParam, TResult>;
 
         /// <summary>
-        /// Dispach로 처리가 요청된 액션의 결과를 구독하기 위한 구독자를 등록합니다.
-        /// 구독자는 IObservable&lt;Unit&rt;의 구현체이어야 하며, Simplex에서는 OnNext만 사용합니다.
+        /// Dispatch로 처리가 요청된 액션의 결과를 구독하기 위한 구독자를 등록합니다.
+        /// 구독자는 IObservable&lt;Unit&gt;의 구현체이어야 하며, Simplex에서는 OnNext만 사용합니다.
         /// Simplex는 에러가 발생되면 구독자의 OnError로 배출하지 않고 Simplex.DefaultExceptionHandler를 통해 배출 합니다.
         /// observable파라미터를 통해 구독 결과에 대한 필터를 사용할 수 있습니다.
         /// </summary>
@@ -74,8 +74,8 @@ namespace Tmon.Simplex.Store
             where TAction : IAction<Unit>;
 
         /// <summary>
-        /// Dispach로 처리가 요청된 액션의 결과를 구독하기 위한 구독자를 등록합니다.
-        /// 구독자는 IObservable&lt;Unit&rt;의 구현체이어야 하며, Simplex에서는 OnNext만 사용합니다.
+        /// Dispatch로 처리가 요청된 액션의 결과를 구독하기 위한 구독자를 등록합니다.
+        /// 구독자는 IObservable&lt;Unit&gt;의 구현체이어야 하며, Simplex에서는 OnNext만 사용합니다.
         /// OnNext에 의해 배출되는 결과 데이터는 기본적으로 복사되어 전달 됩니다. (단, 원시자료형, IEnumerable 데이터는 예외)
         /// 반드시 원본을 전달 받아야 하는 경우는 preventClone 파라미터를 true로 설정하여야 합니다. 
         /// (원본 데이터의 사용은 메모리 누수의 원인이 될 수 있습니다.)
