@@ -23,4 +23,13 @@ public class SimpleLogger implements ILogger {
 			throwable.printStackTrace(writer);	
 		}
 	}
+	
+	@Override
+	public void write(String log, Throwable throwable) {
+		if (writer != null) {
+			writer.write(log);
+			writer.write(" : ");
+			throwable.printStackTrace(writer);	
+		}
+	}
 }
