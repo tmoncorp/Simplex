@@ -18,7 +18,7 @@ namespace Tmon.Simplex.Extensions
                 var type = typeStack.Pop();
                 fInfo = type.GetField($"<{propertyInfo.Name}>k__BackingField", bindingFlags);
 
-                if (fInfo != null || type.BaseType == null || type.BaseType == typeof(System.Object))
+                if (fInfo != null || type.BaseType == null || type.BaseType == typeof(object))
                     break;
 
                 typeStack.Push(type.BaseType);

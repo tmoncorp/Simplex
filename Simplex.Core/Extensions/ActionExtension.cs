@@ -5,7 +5,7 @@ using Tmon.Simplex.Actions;
 
 namespace Tmon.Simplex.Extensions
 {
-    public static class ActionExtension
+    internal static class ActionExtension
     {
         internal static IObservable<TResult> InvokeProcess<TParam, TResult>(this IAction<TResult> source, TParam param)
         {

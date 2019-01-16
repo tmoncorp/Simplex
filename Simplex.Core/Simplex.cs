@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using Tmon.Simplex.Actions;
-using Tmon.Simplex.Channels;
 using Tmon.Simplex.Exceptions;
 using Tmon.Simplex.Store;
 
@@ -30,7 +29,7 @@ namespace Tmon.Simplex
         /// </summary>
         /// <param name="mainThreadScheduler">메인스레드 스케쥴러</param>
         /// <param name="exceptionHandler">글로벌 예외 처리기</param>
-        /// <param name="exceptionThrottleMilliseconds">중복된 예외를 제거하기 위한 시간 버퍼로 기본값은 0.5초 입니다. 중복된 예외르 허용하려면 0을 설정하세요.</param>
+        /// <param name="exceptionThrottleMilliseconds">중복된 예외를 제거하기 위한 시간 버퍼로 기본값은 0.5초 입니다. 중복된 예외를 허용하려면 0을 설정하세요.</param>
         /// <param name="actionTimeoutMilliseconds">액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 입니다.</param>
         /// <param name="logger">로그기록 인터페이스</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -134,6 +133,10 @@ namespace Tmon.Simplex
         internal static ILogger Logger { get; set; }
     }
 
+    /// <summary>
+    /// 단순 로그 기록용 인터페이스 
+    /// (외부의 로거를 사용하기 위한 래퍼입니다.)
+    /// </summary>
     public interface ILogger
     {
         Action<string> Write { get;}
