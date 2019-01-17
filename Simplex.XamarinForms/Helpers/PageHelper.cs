@@ -12,9 +12,10 @@ namespace Tmon.Simplex.XamarinForms.Helpers
     {
         public static Page Find(string id)
         {
-            var allPages = new List<Page> { Application.Current.MainPage }
-                               .Concat(Application.Current.MainPage.Navigation.NavigationStack)
-                               .Concat(Application.Current.MainPage.Navigation.ModalStack.SelectMany(x => x.Navigation.NavigationStack));
+            var mainPage = Application.Current.MainPage;
+            var allPages = new List<Page> { mainPage }
+                               .Concat(mainPage.Navigation.NavigationStack)
+                               .Concat(mainPage.Navigation.ModalStack.SelectMany(x => x.Navigation.NavigationStack));
 
             var pageStack = new Stack<Page>(allPages);
 
