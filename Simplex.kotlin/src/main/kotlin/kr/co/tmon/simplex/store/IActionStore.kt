@@ -17,7 +17,7 @@ interface IActionStore<TActionSet> {
      * @param end 액션 처리 직후에 수행 (메인 스레드에서 수행됩니다.)
      * @param channel 구독자와 연결할 채널(그룹)
      */
-    fun <TAction: IAction<TResult>, TResult> dispatch(
+    fun <TAction : IAction<TResult>, TResult> dispatch(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         begin: Action? = null,
         end: Action? = null,
@@ -35,7 +35,7 @@ interface IActionStore<TActionSet> {
      * @param end 액션 처리 직후에 수행 (메인 스레드에서 수행됩니다.)
      * @param channel 구독자와 연결할 채널(그룹)
      */
-    fun <TAction: IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
+    fun <TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
         action: Function1<TActionSet, IParameterizedActionBinder<TAction, TParam, TResult>>,
         parameters: TParam,
         begin: Action? = null,
@@ -60,12 +60,12 @@ interface IActionStore<TActionSet> {
      * @param preventClone 수행 결과값의 원본전달 여부 (구현안함)
      * @return 구독 제거 Disposable
      */
-    fun <TAction: IAction<TResult>, TResult>subscribe(
+    fun <TAction : IAction<TResult>, TResult>subscribe(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         onNext: (TResult) -> Unit,
         observeOnMainThread: Boolean = false,
         observable : Function1<Observable<TResult>, Observable<TResult>>? = null,
         channel: Function1<TAction, IChannel>? = null,
         preventClone: Boolean = false
-    ): Disposable?
+    ) : Disposable?
 }

@@ -12,43 +12,51 @@ import io.reactivex.subjects.PublishSubject
 
 class Simplex {
     companion object {
-
-        /// <summary>
-        /// Store 인스턴스
-        /// </summary>
+        /**
+         * Store 인스턴스
+         */
         @JvmField
         var Store: IActionStore<*>? = null
 
-        /// <summary>
-        /// 초기화 여부
-        /// </summary>
+        /**
+         * 초기화 여부
+         */
         @JvmField
         var IsInitialized: Boolean = false
 
-        /// <summary>
-        /// 액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 입니다.
-        /// </summary>
+        /**
+         * 액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 입니다.
+         */
         @JvmField
         internal var DefaultActionTimeout: Long = 10000
 
-        /// <summary>
-        /// 예외를 배출시킬 주체
-        /// </summary>
+        /**
+         * 예외를 배출시킬 주체
+         */
         @JvmField
         internal var ExceptionSubject: PublishSubject<Throwable>? = null
 
-        /// <summary>
-        /// 메인 쓰레드 스케줄러로 플랫폼별 구현되어야 합니다.
-        /// </summary>
+        /**
+         * 메인 쓰레드 스케줄러로 플랫폼별 구현되어야 합니다.
+         */
         @JvmField
         var MainThreadScheduler: Scheduler? = null
 
-        /// <summary>
-        /// 로그기록 인터페이스
-        /// </summary>
+        /**
+         * 로그기록 인터페이스
+         */
         @JvmField
         internal var Logger: ILogger? = null
 
+        /**
+         * Simplex를 초기화 합니다.
+         * 초기화는 한번만 호출 되어야 하며, 중복으로 초기화가 된 경우 InitializationException이 발생됩니다.
+         * @param mainThreadScheduler 메인 스레드 스케줄러 (UI가 존재하는 경우 UI 스레드가 일반적으로 메인 스레드가 됩니다.)
+         * @param exceptionHandler 예외가 발생되었을때 처리할 예외 처리기
+         * @param exceptionThrottleMilliseconds 중복된 예외를 제거하기 위한 시간 버퍼로 기본값은 0.5초 입니다. 중복된 예외를 허용하려면 0을 설정하세요.
+         * @param actionTimeoutMilliseconds 액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 입니다.
+         * @param logger 로그기록 인터페이스
+         */
         @JvmStatic
         fun initialize(
             mainThreadScheduler: Scheduler? = null,
@@ -59,7 +67,7 @@ class Simplex {
 
             synchronized(this) {
                 if (IsInitialized) {
-                    throw Exception("{Store.GetType().FullName} 타입용으로 이미 초기화 되어 있습니다.")
+                    throw Exception("Store는 이미 초기화 되어 있습니다.")
                 }
 
                 MainThreadScheduler = mainThreadScheduler

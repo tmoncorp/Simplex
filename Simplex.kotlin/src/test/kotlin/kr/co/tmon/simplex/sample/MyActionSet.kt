@@ -16,16 +16,15 @@ class MyActionSet : AbstractActionBinderSet() {
         get() = getOrAddParameterizedAction("getInteger")
 }
 
-class GetBoolean : ParametricAbstractAction<Boolean, Boolean>() {
-//    lateinit var ch1: IChannel// = null// by lazy { Channel() }
-//    lateinit var ch2: IChannel// = null// by lazy { Channel() }
+class GetBoolean : AbstractParameterizedAction<Boolean, Boolean>() {
+    var ch1: IChannel? = null
 
     override fun process(param: Boolean?): Observable<Boolean> {
         return Observable.just(param)
     }
 }
 
-class GetIntegerString : ParametricAbstractAction<Int, String>() {
+class GetIntegerString : AbstractParameterizedAction<Int, String>() {
     val ch1: IChannel by lazy { Channel() }
     val ch2: IChannel by lazy { Channel() }
 
@@ -36,9 +35,6 @@ class GetIntegerString : ParametricAbstractAction<Int, String>() {
 
 @Unsubscribe
 class SendSignal : AbstractAction<Unit>() {
-    var ch1: IChannel? = null
-    var ch2: IChannel? = null
-
     override fun process(): Observable<Unit> {
         return Observable.just(Unit)
     }

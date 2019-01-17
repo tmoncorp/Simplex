@@ -13,7 +13,7 @@ interface IAction<TResult> {
 	/// <param name="exception">에러</param>
 	/// <param name="result">정상 데이터로 변환된 결과</param>
 	/// <returns>변환 성공 유무</returns>
-	fun transform(exception: Throwable, result: DataHolder<TResult>): Boolean
+	fun transform(exception: Throwable): TransformedResult<TResult>
 
 	/// <summary>
 	/// 실행할 비지니스 로직을 담고 있는 메소드
@@ -26,6 +26,6 @@ interface IAction<TResult> {
 	/// </summary>
 	/// <param name="channels"></param>
 	/// <returns></returns>
-	fun zip(vararg channels: IChannel): IChannel
+	fun zip(vararg channels: IChannel) : IChannel
 }
 

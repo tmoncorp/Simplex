@@ -17,7 +17,7 @@ import kotlin.reflect.full.*
 
 class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
 	companion object {
-        inline operator fun <reified TActionSet: Any> invoke() = Store {
+        inline operator fun <reified TActionSet : Any> invoke() = Store {
             TActionSet::class.java.newInstance()
         }
     }
@@ -25,7 +25,7 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
     private val actions: TActionSet = factory()
     private val observableSources: ConcurrentHashMap<String, Any> = ConcurrentHashMap()
 
-    override fun <TAction: IAction<TResult>, TResult> dispatch(
+    override fun <TAction : IAction<TResult>, TResult> dispatch(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         begin: Action?,
         end: Action?,
@@ -33,7 +33,7 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         dispatchInner(action, null, channel, begin, end)
 	}
 
-    override fun <TAction: IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
+    override fun <TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
         action: Function1<TActionSet, IParameterizedActionBinder<TAction, TParam, TResult>>,
         parameters: TParam,
         begin: Action?,
@@ -42,18 +42,18 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         dispatchInner(action, parameters, channel, begin, end)
     }
 
-    override fun <TAction: IAction<TResult>, TResult>subscribe(
+    override fun <TAction : IAction<TResult>, TResult>subscribe(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         onNext: (TResult) -> Unit,
         observeOnMainThread: Boolean,
         observable : Function1<Observable<TResult>, Observable<TResult>>?,
         channel: Function1<TAction, IChannel>?,
         preventClone: Boolean
-    ): Disposable? {
+    ) : Disposable? {
         return subscribeInner(action, onNext, observable, channel, observeOnMainThread)
     }
 
-    private fun <TAction: IAction<TResult>, TResult> subscribeInner(
+    private fun <TAction : IAction<TResult>, TResult> subscribeInner(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         onNext: (TResult) -> Unit,
         observable: Function1<Observable<TResult>, Observable<TResult>>? = null,
@@ -77,7 +77,7 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         return o.subscribe{ onNext(it) }
     }
 
-    private fun <TAction: IAction<TResult>, TParam, TResult> dispatchInner(
+    private fun <TAction : IAction<TResult>, TParam, TResult> dispatchInner(
         action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
         param: TParam,
         channel: Function1<TAction, IChannel>?  = null,
@@ -92,10 +92,10 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
             val resultObservable = binder.action.toObservable(param)
                 .timeout(Simplex.DefaultActionTimeout, TimeUnit.MILLISECONDS)
                 .onErrorResumeNext { exception: Throwable ->
-                    val result = DataHolder<TResult>()
-                    if (binder.action.transform(exception, result)) {
+                    val transform = binder.action.transform(exception)
+                    if (transform.isTransformed) {
                         Simplex.Logger?.write?.invoke("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.")
-                        Observable.just(result.data)
+                        Observable.just(transform.result)
                     }
                     else {
                         Simplex.Logger?.write?.invoke(exception.message ?: "")
@@ -108,7 +108,7 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
             if (binder.action::class.findAnnotation<Unsubscribe>() != null) {
                     createChannelIfNull(binder.action)
                     //더미
-                    resultObservable.subscribe { println("Unsubscribe action") }
+                    resultObservable.subscribe()
             }
             else {
                 //채널이 생성되지 않았으면 기본 Channel클래스로 생성
@@ -139,7 +139,7 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         return abstractAction?.default ?: throw IllegalAccessException("${action.javaClass.name}에서 기본 채널을 가져올 수 있는 방법이 구현되지 않았습니다.")
     }
 
-    private fun <TResult> getOrAddObservableSource(action: IAction<TResult>): PublishSubject<Pair<IChannel, TResult>> {
+    private fun <TResult> getOrAddObservableSource(action: IAction<TResult>) : PublishSubject<Pair<IChannel, TResult>> {
         // Default채널의 Id를 키로 등록한다.
         val key = getDefaultChannel(action).id
 
