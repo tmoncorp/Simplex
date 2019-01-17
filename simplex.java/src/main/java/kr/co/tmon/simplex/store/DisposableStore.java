@@ -262,12 +262,10 @@ public class DisposableStore<TActionBinderSet extends IActionBinderSet> implemen
 	@Override
 	public void dispose() {
 		if (managedDisposables.containsKey(subscriberId)) {
-			CompositeDisposable disposable = managedDisposables.get(subscriberId);
-			
+			CompositeDisposable disposable = managedDisposables.remove(subscriberId);
 			if (!disposable.isDisposed()) {
 				disposable.dispose();
 			}
-			managedDisposables.remove(subscriberId);
 		}
 	}
 
