@@ -7,7 +7,7 @@ package kr.co.tmon.simplex.actions;
  * @param <TAction> 액션 타입
  * @param <TResult> 액션의 결과값 반환 타입
  */
-public interface IActionBinder<TAction extends IAction<TResult>, TResult> {
+public interface IActionBinder<TAction extends IAction<TParam, TResult>, TParam, TResult> {
 
 	/**
 	 * 액션을 조회합니다.
