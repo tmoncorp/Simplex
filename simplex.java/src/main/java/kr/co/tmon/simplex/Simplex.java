@@ -102,16 +102,20 @@ public class Simplex {
 		if (ExceptionSubject == null) {
 			final Consumer<Exception> exHandler = exceptionHandler;
 			ExceptionSubject = PublishSubject.create();
-			ExceptionSubject.buffer(exceptionThrottleMilliseconds, TimeUnit.MILLISECONDS).filter(x -> x.size() > 0)
-					.flatMapIterable(x -> x).distinct(x -> x.getMessage()).subscribe(x -> {
-						MainThreadScheduler.scheduleDirect(() -> {
-							try {
-								exHandler.accept(x);
-							} catch (Exception e) {
-								Logger.write(e);
-							}
-						});
+			ExceptionSubject
+				.buffer(exceptionThrottleMilliseconds, TimeUnit.MILLISECONDS)
+				.filter(x -> x.size() > 0)
+				.flatMapIterable(x -> x)
+				.distinct(x -> x.getMessage())
+				.subscribe(x -> {
+					MainThreadScheduler.scheduleDirect(() -> {
+						try {
+							exHandler.accept(x);
+						} catch (Exception e) {
+							Logger.write(e);
+						}
 					});
+				});
 		}
 
 		//초기화 완료

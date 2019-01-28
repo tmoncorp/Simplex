@@ -7,11 +7,7 @@ class ActionBinder<TAction extends IAction<TParam, TResult>, TParam, TResult> im
 	public TAction getAction() {
 		return action;
 	}
-	
-//	public ActionBinder(TAction action) {
-//		this.action = action;
-//	}
-	
+		
 	public ActionBinder(Class<TAction> clazz) throws InstantiationException, IllegalAccessException {
 		action = clazz.newInstance();
 	}

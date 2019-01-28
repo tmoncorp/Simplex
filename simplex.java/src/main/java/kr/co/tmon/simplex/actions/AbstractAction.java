@@ -6,7 +6,7 @@ import kr.co.tmon.simplex.channels.IChannel;
 
 public abstract class AbstractAction<TParam, TResult> implements IAction<TParam, TResult> {
 
-	protected IChannel defaultChannel;
+	private IChannel defaultChannel;
 	
 	@Override
 	public IChannel getDefaultChannel() {
