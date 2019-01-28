@@ -15,7 +15,7 @@ public abstract class AbstractActionBinderSet implements IActionBinderSet {
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <TAction extends IAction<TParam, TResult>, TParam, TResult> 
+	public <TAction extends IAction<TParam, TResult>, TParam, TResult> 
 		IActionBinder<TAction, TParam, TResult> getOrAdd(String actionBinderKey, Class<TAction> clazz) {	
 		if (actionBinderKey == null || "".equals(actionBinderKey)) {
 			throw new NullPointerException("actionBinderKey는 필수 입력값 입니다.");
