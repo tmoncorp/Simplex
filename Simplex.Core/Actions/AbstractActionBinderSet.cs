@@ -41,7 +41,7 @@ namespace Tmon.Simplex.Actions
         /// <typeparam name="TResult">단위작업의 결과 반환타입</typeparam>
         /// <param name="key">단위작업의 등록 키</param>
         /// <returns>단위작업 바인더 인스턴스</returns>
-        protected virtual IActionBinder<TAction, TResult> GetOrAdd<TAction, TResult>([CallerMemberName] string actionBinderKey = "")
+        public IActionBinder<TAction, TResult> GetOrAdd<TAction, TResult>([CallerMemberName] string actionBinderKey = "")
             where TAction : class, IAction<TResult>, new()
         => GetOrAdd(actionBinderKey, k => new ActionBinder<TAction, TResult>()) as ActionBinder<TAction, TResult>;
 
@@ -53,7 +53,7 @@ namespace Tmon.Simplex.Actions
         /// <typeparam name="TResult">단위작업의 결과 반환 타입</typeparam>
         /// <param name="key">단위작업의 등록 키</param>
         /// <returns>단위작업 바인더 인스턴스</returns>
-        protected virtual IActionBinder<TAction, TParam, TResult> GetOrAdd<TAction, TParam, TResult>([CallerMemberName] string actionBinderKey = "")
+        public IActionBinder<TAction, TParam, TResult> GetOrAdd<TAction, TParam, TResult>([CallerMemberName] string actionBinderKey = "")
            where TAction : class, IAction<TParam, TResult>, new()
             => GetOrAdd(actionBinderKey, k => new ActionBinder<TAction, TParam, TResult>()) as ActionBinder<TAction, TParam, TResult>;
 
