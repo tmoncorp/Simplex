@@ -36,9 +36,12 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 	
 	private Hashtable<String, Object> observableSources;
 	
-	public Store(Class<TActionBinderSet> clazz) {
+	private DescriptorFactory<TActionBinderSet> descriptorFactory;
+	
+	public Store(Class<TActionBinderSet> clazz) throws InstantiationException, IllegalAccessException {
 		this.clazz = clazz;
 		this.observableSources = new Hashtable<String, Object>();
+		this.descriptorFactory = new DescriptorFactory<TActionBinderSet>(getActions());
 	}
 	
 	protected TActionBinderSet getActions() throws InstantiationException, IllegalAccessException {
@@ -54,7 +57,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 			Function<DescriptorFactory<TActionBinderSet>, IDispatchDescriptor<TAction, TParam, TResult>> descriptor) {
 		try {
 			DispatchDescriptor<TAction, TParam, TResult> desc 
-				= (DispatchDescriptor<TAction, TParam, TResult>)descriptor.apply(new DescriptorFactory<TActionBinderSet>(getActions()));
+				= (DispatchDescriptor<TAction, TParam, TResult>)descriptor.apply(descriptorFactory);
 			
 			dispatchInner(
 					desc.getAction(), 
@@ -77,7 +80,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 		Disposable disposable = null;
 		try {
 			SubscriptionDescriptor<TAction, TParam, TResult> desc 
-				= (SubscriptionDescriptor<TAction, TParam, TResult>)descriptor.apply(new DescriptorFactory<TActionBinderSet>(getActions()));
+				= (SubscriptionDescriptor<TAction, TParam, TResult>)descriptor.apply(descriptorFactory);
 			
 			disposable = subscribeInner(
 					desc.getAction(), 
