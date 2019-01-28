@@ -1,6 +1,7 @@
 package kr.co.tmon.simplex;
 
 
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
@@ -17,33 +18,34 @@ import kr.co.tmon.simplex.store.IActionStore;
 import kr.co.tmon.simplex.store.Store;
 
 /**
+ * Simplex를 초기화하고 스토어의 인스턴스를 발행하는 클래스
+ * getStore()를 통해 Store 인스턴스를 취득할 수 있으며, getStore() 호출전에는 
+ * 반드시 initialize() 메소드를 호출하여야 합니다.
+ * 이 메소드는 한번만 호출되어야 하며, 중복 호출된 경우에 예외가 발생됩니다.
  * 
- *   
- *  
  * @author yookjy
- *
  */
 public class Simplex {
 
 	/**
 	 * 액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 
 	 */
-	public static int DefaultActionTimeoutMilliseconds = 10000;
+	private static int defaultActionTimeoutMilliseconds = 10000;
 	
 	/**
 	 * 메인 스레드 (플랫폼별로 구현되어야 함) 
 	 */
-	public static Scheduler MainThreadScheduler;
+	private static Scheduler mainThreadScheduler;
 
 	/**
 	 * 로그 기록 인터페이스
 	 */
-	public static ILogger Logger;
+	private static ILogger logger;
 
 	/**
 	 * 예외를 배출시킬 주체
 	 */
-	public static Subject<Exception> ExceptionSubject;
+	private static Subject<Exception> exceptionSubject;
 
 	/**
 	 * 스토어 인스턴스
@@ -56,13 +58,22 @@ public class Simplex {
 	 */
 	private static boolean isInitialized;
 
-	/**
-	 * 초기화 여부
-	 */
-	public static boolean isInitialized() {
-		return isInitialized;
+	public static int getDefaultActionTimeoutMilliseconds() {
+		return defaultActionTimeoutMilliseconds;
 	}
-
+	
+	public static Scheduler getMainThreadScheduler() {
+		return mainThreadScheduler;
+	}
+	
+	public static ILogger getLogger() {
+		return logger;
+	}
+	
+	public static Subject<Exception> getExceptionSubject() {
+		return exceptionSubject;
+	}
+	
 	/**
 	 * Simplex를 초기화 합니다.
 	 * 초기화는 한번만 호출 되어야 하며, 중복으로 초기화가 된 경우 InitializationException이 발생됩니다.
@@ -73,50 +84,57 @@ public class Simplex {
 	 * @param actionTimeoutMilliseconds 액션 처리가 지연될때 예외를 발생시킬 시간으로 기본값은 10초 입니다.
 	 * @param logger 로그기록 인터페이스
 	 */
-	public synchronized static void Initialize(Scheduler mainThreadScheduler, Consumer<Exception> exceptionHandler,
-			int exceptionThrottleMilliseconds, int actionTimeoutMilliseconds, ILogger logger) {
+	public synchronized static void Initialize(
+			final Scheduler mainThreadScheduler, 
+			final Consumer<Exception> exceptionHandler,
+			final int exceptionThrottleMilliseconds, 
+			final int actionTimeoutMilliseconds, 
+			final ILogger logger) {
 
-		if (isInitialized()) {
+		if (isInitialized) {
 			throw new InitializationException(store.getClass().getName() + "타입용으로 이미 초기화 되어 있습니다.");
 		}
 
-		MainThreadScheduler = mainThreadScheduler;
-		DefaultActionTimeoutMilliseconds = actionTimeoutMilliseconds;
-		Logger = logger;
-
-		if (MainThreadScheduler == null) {
-			MainThreadScheduler = Schedulers.trampoline();
+		Simplex.mainThreadScheduler = mainThreadScheduler;
+		Simplex.defaultActionTimeoutMilliseconds = actionTimeoutMilliseconds;
+		Simplex.logger = logger;
+		
+		if (Simplex.mainThreadScheduler == null) {
+			Simplex.mainThreadScheduler = Schedulers.trampoline();
+		}
+		
+		if (Simplex.logger == null) {
+			Simplex.logger = new SimpleLogger(new PrintWriter(System.out));
 		}
 
-		if (exceptionHandler == null) {
-			exceptionHandler = ex -> {
+		final Consumer<Exception> exHandler = 
+				exceptionHandler != null 
+					? exceptionHandler
+					: ex -> {
 
-				MainThreadScheduler.scheduleDirect(() -> {
-					throw new UnhandledErrorException(
-							"IAction.Execute를 구현하는 객체가 오류를 발생시켰습니다. IAction<T>.Transform을 재정의하면 에러를 정상 데이터로 변환하여 구독할 수 있습니다.",
-							ex);
+						Simplex.mainThreadScheduler.scheduleDirect(() -> {
+							throw new UnhandledErrorException(
+									"IAction.Execute를 구현하는 객체가 오류를 발생시켰습니다. IAction<T>.Transform을 재정의하면 에러를 정상 데이터로 변환하여 구독할 수 있습니다.",
+									ex);
+						});
+					};
+ 
+		exceptionSubject = PublishSubject.create();
+		exceptionSubject
+			.buffer(exceptionThrottleMilliseconds, TimeUnit.MILLISECONDS)
+			.filter(x -> x.size() > 0)
+			.flatMapIterable(x -> x)
+			.distinct(x -> x.getMessage())
+			.subscribe(x -> {
+				Simplex.mainThreadScheduler.scheduleDirect(() -> {
+					try {
+						exHandler.accept(x);
+					} catch (Exception e) {
+						logger.write(e);
+					}
 				});
-			};
-		}
+			});
 
-		if (ExceptionSubject == null) {
-			final Consumer<Exception> exHandler = exceptionHandler;
-			ExceptionSubject = PublishSubject.create();
-			ExceptionSubject
-				.buffer(exceptionThrottleMilliseconds, TimeUnit.MILLISECONDS)
-				.filter(x -> x.size() > 0)
-				.flatMapIterable(x -> x)
-				.distinct(x -> x.getMessage())
-				.subscribe(x -> {
-					MainThreadScheduler.scheduleDirect(() -> {
-						try {
-							exHandler.accept(x);
-						} catch (Exception e) {
-							Logger.write(e);
-						}
-					});
-				});
-		}
 
 		//초기화 완료
 		isInitialized = true;
@@ -143,8 +161,8 @@ public class Simplex {
 				constructor.setAccessible(true);
 				store = (Store<TActionBinderSet>)constructor.newInstance(clazz);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
-				ExceptionSubject.onNext(e);
-				Logger.write(e);
+				exceptionSubject.onNext(e);
+				logger.write(e);
 			}
 		}
 		

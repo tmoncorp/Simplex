@@ -67,8 +67,8 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 					desc.getChannel());
 			
 		} catch (Exception e) {
-			Simplex.ExceptionSubject.onNext(e);
-			Simplex.Logger.write(e);
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
 		}
 	}
 	
@@ -91,8 +91,8 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 					desc.getPreventClone());
 			
 		} catch (Exception e) {
-			Simplex.ExceptionSubject.onNext(e);
-			Simplex.Logger.write(e);
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
 		}
 		return disposable;
 	}
@@ -129,7 +129,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 			}
 			
 			if (observerOnMainThread) {
-				o = o.observeOn(Simplex.MainThreadScheduler);
+				o = o.observeOn(Simplex.getMainThreadScheduler());
 			}
 			
 			return o
@@ -149,16 +149,16 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 				        }
 				        catch (Exception ex)
 				        {
-				            Simplex.ExceptionSubject.onNext(ex);
-				            Simplex.Logger.write(ex);
+				            Simplex.getExceptionSubject().onNext(ex);
+				            Simplex.getLogger().write(ex);
 				        }
 						return x;
 					})
 					.subscribe(onNext);
 						
 		} catch (Exception e) {
-			Simplex.ExceptionSubject.onNext(e);
-			Simplex.Logger.write(e);
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
 		}
 		
 		return null;
@@ -172,21 +172,21 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 			Action end, 
 			Function<TAction, IChannel> channel) {
 		if (begin != null) {
-			Simplex.MainThreadScheduler.scheduleDirect(() -> {
+			Simplex.getMainThreadScheduler().scheduleDirect(() -> {
 				try {
 					begin.run();
 				} catch (Exception e) {
-					Simplex.Logger.write(e);
+					Simplex.getLogger().write(e);
 				}
 			});
 		}
 			
-		Action doCompleted = () -> Simplex.MainThreadScheduler.scheduleDirect(() -> {
+		Action doCompleted = () -> Simplex.getMainThreadScheduler().scheduleDirect(() -> {
 			if (end != null) {
 				try {
 					end.run();
 				} catch (Exception e1) {
-					Simplex.Logger.write(e1);
+					Simplex.getLogger().write(e1);
 				}
 			}
 		});
@@ -197,15 +197,15 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 			resultObservable = ((IAction<TParam, TResult>)action).process(parameter);
 			
 			resultObservable = resultObservable
-					.timeout(Simplex.DefaultActionTimeoutMilliseconds, TimeUnit.MILLISECONDS)
+					.timeout(Simplex.getDefaultActionTimeoutMilliseconds(), TimeUnit.MILLISECONDS)
 					.onErrorResumeNext(throwable -> {
 						TransformedResult<TResult> transform = ((IAction<TParam, TResult>)action).transform(throwable);
 						if (transform.isTransformed()) {
-							Simplex.Logger.write("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.");
+							Simplex.getLogger().write("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.");
 							return Observable.just(transform.getResult());
 						}
-						Simplex.Logger.write(throwable);
-                        Simplex.ExceptionSubject.onNext(new Exception(throwable));
+						Simplex.getLogger().write(throwable);
+                        Simplex.getExceptionSubject().onNext(new Exception(throwable));
 						return Observable.empty();
 					})
 					.doOnComplete(doCompleted);
@@ -230,12 +230,12 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
                 
 			}
 		} catch(Exception ex) {
-			Simplex.ExceptionSubject.onNext(ex);
-			Simplex.Logger.write(ex);
+			Simplex.getExceptionSubject().onNext(ex);
+			Simplex.getLogger().write(ex);
 			try {
 				doCompleted.run();
 			} catch (Exception e) {
-				Simplex.Logger.write(ex);
+				Simplex.getLogger().write(ex);
 			}
 		}
 	}
