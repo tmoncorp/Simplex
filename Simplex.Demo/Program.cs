@@ -30,7 +30,7 @@ namespace SimplexDemo.Actions
 
                 Store.Subscribe(
                     action: set => set.GetInteger,
-                    //channel: act => act.ExCh1,
+                    channel: act => act.ExCh1,
                     onNext: result => System.Console.WriteLine($"GetInteger Ch1       : {result}"));
 
                 //Store.Subscribe(
@@ -62,7 +62,7 @@ namespace SimplexDemo.Actions
 
                 //Store.Dispatch(action: set => set.SendSignal);
             }
-            GC.Collect();
+            
             Console.ReadKey();
         }
     }
