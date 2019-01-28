@@ -143,6 +143,7 @@ public class Simplex {
 				constructor.setAccessible(true);
 				store = (Store<TActionBinderSet>)constructor.newInstance(clazz);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+				ExceptionSubject.onNext(e);
 				Logger.write(e);
 			}
 		}
