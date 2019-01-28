@@ -51,12 +51,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 	
 	@Override
 	public <TAction extends IAction<TParam, TResult>, TParam, TResult> void dispatch(
-			Function<DescriptorFactory<TActionBinderSet>, IDispatchDescriptor<TAction, TParam, TResult>> descriptor /*,
-			Function<TActionBinderSet, IParameterizedActionBinder<TAction, TParam, TResult>> action,
-			TParam parameter,
-			Action begin,
-			Action end,
-			Function<TAction, IChannel> channel*/) {
+			Function<DescriptorFactory<TActionBinderSet>, IDispatchDescriptor<TAction, TParam, TResult>> descriptor) {
 		try {
 			DispatchDescriptor<TAction, TParam, TResult> desc 
 				= (DispatchDescriptor<TAction, TParam, TResult>)descriptor.apply(new DescriptorFactory<TActionBinderSet>(getActions()));
@@ -69,8 +64,8 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 					desc.getChannel());
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Simplex.ExceptionSubject.onNext(e);
+			Simplex.Logger.write(e);
 		}
 	}
 	
@@ -93,11 +88,10 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 					desc.getPreventClone());
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Simplex.ExceptionSubject.onNext(e);
+			Simplex.Logger.write(e);
 		}
 		return disposable;
-		//return subscribeInner(action, (o -> onNext.run()), observerOnMainThread, observable, channel, false);
 	}
 	
 	private <TAction extends IAction<TParam, TResult>, TParam, TResult, TActionBinder extends IActionBinder<?, TParam, TResult>> Disposable subscribeInner(
