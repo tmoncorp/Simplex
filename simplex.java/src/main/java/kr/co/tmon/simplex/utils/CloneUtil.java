@@ -45,7 +45,7 @@ public class CloneUtil {
 				copyInstance(clazz, source, target);
 				return target;
 			} catch (Exception ex) {
-				Simplex.Logger.write(clazz.getName() + " 필드 복사가 skip 되었습니다. " + ex.getMessage());
+				Simplex.getLogger().write(clazz.getName() + " 필드 복사가 skip 되었습니다. " + ex.getMessage());
 				return null;
 			}
 		}
@@ -93,7 +93,7 @@ public class CloneUtil {
 						field.set(target, deepCloneObject(value));
 					}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					Simplex.Logger.write(field.getName() + " 필드의 값 복사가 실패하였습니다.");
+					Simplex.getLogger().write(field.getName() + " 필드의 값 복사가 실패하였습니다.");
 				}
 				
 			}

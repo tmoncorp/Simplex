@@ -28,70 +28,63 @@ public class Program {
 				
 		DisposableStore<MyActionSet> store = Simplex.getStore(MyActionSet.class).toDisposableStore("subscriber-id");
 		
-		store.subscribe(
-				set -> set.sendSignal(),
-				() -> {
+		store.subscribe(descBuilder -> descBuilder
+				.from(set -> set.sendSignal())
+				.onNext(() -> {
 					System.out.println("결과 수신");
-				},
-				false,
-				null,
-				null);
+				}));
 		
-		store.subscribe(
-				set -> set.getIntegerString(),
-				result -> {
+		store.subscribe(descBuilder -> descBuilder
+				.from(set -> set.getIntegerString())
+				.onNext(result -> {
 					System.out.println("GetInteger Ch1 & Ch2 : " + result);
-				},
-				false,
-				ob -> ob.distinct(), 
-				act -> act.zip(act.ExCh1, act.ExCh2), 
-				false);
+				})
+				.observable(ob -> ob.distinct())
+				.selectChannel(act -> act.zip(act.ExCh1, act.ExCh2)));
 		
-		store.subscribe(
-				set -> set.getIntegerString(),
-				result -> {
+		store.subscribe(descBuilder -> descBuilder
+				.from(set -> set.getIntegerString())
+				.onNext(result -> {
 					System.out.println("GetInteger       Ch2 : " + result);
-				},
-				false,
-				null, 
-				act -> act.ExCh2, 
-				false);
+				})
+				.selectChannel(act -> act.ExCh2));
 		
-		store.subscribe(
-				set -> set.getIntegerString(),
-				result -> {
+		store.subscribe(descBuilder -> descBuilder
+				.from(set -> set.getIntegerString())
+				.onNext(result -> {
 					System.out.println("GetInteger Ch1       : " + result);
-				},
-				act -> act.ExCh1,
-				false);
+				})
+				.selectChannel(act -> act.ExCh1));
 		
+		store.dispatch(descBuilder -> descBuilder
+				.to(set -> set.sendSignal())
+				.onBegin(() -> System.out.println("begin..."))
+				.onEnd(() -> System.out.println("....end")));
 		
-		store.dispatch(
-				set -> set.sendSignal(),
-				() -> System.out.println("begin..."),
-				() -> System.out.println("....end"));
-		
-		store.dispatch(
-				set -> set.getBoolean(),
-				true,
-				() -> System.out.println("begin..."),
-				() -> System.out.println("....end"));
-		
+		store.dispatch(descBuilder -> descBuilder
+				.to(set -> set.getBoolean())
+				.setParameter(true)
+				.onBegin(() -> System.out.println("begin..."))
+				.onEnd(() -> System.out.println("....end")));
 
 		store.dispatch(
-				set -> set.getIntegerString(),
-				1,
-				act -> act.ExCh1);
+				descBuilder -> descBuilder
+					.to(set -> set.getIntegerString())
+					.setParameter(1)
+					.selectChannel(act -> act.ExCh1));
 		
 		store.dispatch(
-				set -> set.getIntegerString(),
-				1,
-				act -> act.zip(act.ExCh1, act.ExCh2));
+				descBuilder -> descBuilder
+					.to(set -> set.getIntegerString())
+					.setParameter(1)
+					.selectChannel(act -> act.zip(act.ExCh1, act.ExCh2)));
 		
 		store.dispatch(
-				set -> set.getIntegerString(),
-				1,
-				act -> act.ExCh2);
+				descBuilder -> descBuilder
+					.to(set -> set.getIntegerString())
+					.setParameter(1)
+					.selectChannel(act -> act.ExCh2));
+					
 		
 		store.dispose();
 		

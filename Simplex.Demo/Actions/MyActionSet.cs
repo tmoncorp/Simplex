@@ -16,6 +16,9 @@ namespace SimplexDemo.Actions
 
         public IActionBinder<GetIntegerString, int, string> GetInteger
             => GetOrAdd<GetIntegerString, int, string>();
+
+        public SecondActionSet SecondsSet
+            => GetOrAdd<SecondActionSet>();
     }
 
     public class SecondActionSet : AbstractActionBinderSet

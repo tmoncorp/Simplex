@@ -1,10 +1,10 @@
 package kr.co.tmon.simplex.sample.actions;
 
 import io.reactivex.Observable;
-import kr.co.tmon.simplex.actions.AbstractParameterizedAction;
+import kr.co.tmon.simplex.actions.AbstractAction;
 import kr.co.tmon.simplex.channels.IChannel;
 
-public class GetBoolean extends AbstractParameterizedAction<Boolean, Boolean> {
+public class GetBoolean extends AbstractAction<Boolean, Boolean> {
 
 	public IChannel ExCh1;
 	

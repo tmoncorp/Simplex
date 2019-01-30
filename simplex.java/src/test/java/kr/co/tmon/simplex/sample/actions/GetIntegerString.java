@@ -2,10 +2,10 @@ package kr.co.tmon.simplex.sample.actions;
 
 
 import io.reactivex.Observable;
-import kr.co.tmon.simplex.actions.AbstractParameterizedAction;
+import kr.co.tmon.simplex.actions.AbstractAction;
 import kr.co.tmon.simplex.channels.IChannel;
 
-public class GetIntegerString extends AbstractParameterizedAction<Integer, String>{
+public class GetIntegerString extends AbstractAction<Integer, String>{
 
 	public IChannel ExCh1;
 	

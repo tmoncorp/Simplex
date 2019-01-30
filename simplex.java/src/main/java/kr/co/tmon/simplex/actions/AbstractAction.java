@@ -4,9 +4,9 @@ import kr.co.tmon.simplex.channels.Channel;
 import kr.co.tmon.simplex.channels.ChannelZip;
 import kr.co.tmon.simplex.channels.IChannel;
 
-public abstract class AbstractAction<TResult> implements IAction<TResult> {
+public abstract class AbstractAction<TParam, TResult> implements IAction<TParam, TResult> {
 
-	protected IChannel defaultChannel;
+	private IChannel defaultChannel;
 	
 	@Override
 	public IChannel getDefaultChannel() {

@@ -261,3 +261,5 @@ __pycache__/
 *.pyc
 /.metadata/
 /.recommenders/index/http___download_eclipse_org_recommenders_models_photon_
+/.recommenders/
+/Simplex.kotlin

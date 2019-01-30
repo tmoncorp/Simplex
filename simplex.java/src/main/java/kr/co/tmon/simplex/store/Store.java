@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import kr.co.tmon.simplex.Simplex;
 import kr.co.tmon.simplex.actions.IActionBinder;
 import kr.co.tmon.simplex.actions.IActionBinderSet;
-import kr.co.tmon.simplex.actions.IParameterizedActionBinder;
 import kr.co.tmon.simplex.annotations.Unsubscribe;
 import kr.co.tmon.simplex.channels.Channel;
 import kr.co.tmon.simplex.channels.IChannel;
@@ -25,8 +24,9 @@ import kr.co.tmon.simplex.reactivex.Unit;
 import kr.co.tmon.simplex.utils.ChannelUtil;
 import kr.co.tmon.simplex.utils.CloneUtil;
 import kr.co.tmon.simplex.actions.IAction;
-import kr.co.tmon.simplex.actions.IParameterizedAction;
 import kr.co.tmon.simplex.actions.TransformedResult;
+import kr.co.tmon.simplex.actions.descriptor.IDispatchDescriptor;
+import kr.co.tmon.simplex.actions.descriptor.ISubscriptionDescriptor;
 
 public class Store<TActionBinderSet extends IActionBinderSet> implements IActionStore<TActionBinderSet> {
 
@@ -36,9 +36,12 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 	
 	private Hashtable<String, Object> observableSources;
 	
-	public Store(Class<TActionBinderSet> clazz) {
+	private DescriptorFactory<TActionBinderSet> descriptorFactory;
+	
+	public Store(Class<TActionBinderSet> clazz) throws InstantiationException, IllegalAccessException {
 		this.clazz = clazz;
 		this.observableSources = new Hashtable<String, Object>();
+		this.descriptorFactory = new DescriptorFactory<TActionBinderSet>(getActions());
 	}
 	
 	protected TActionBinderSet getActions() throws InstantiationException, IllegalAccessException {
@@ -48,237 +51,60 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 
 		return actions;
 	}
+	
+	@Override
+	public <TAction extends IAction<TParam, TResult>, TParam, TResult> void dispatch(
+			Function<DescriptorFactory<TActionBinderSet>, IDispatchDescriptor<TAction, TParam, TResult>> descriptor) {
+		try {
+			DispatchDescriptor<TAction, TParam, TResult> desc 
+				= (DispatchDescriptor<TAction, TParam, TResult>)descriptor.apply(descriptorFactory);
+			
+			dispatchInner(
+					desc.getAction(), 
+					desc.getParameter(), 
+					desc.getBegin(), 
+					desc.getEnd(), 
+					desc.getChannel());
+			
+		} catch (Exception e) {
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
+		}
+	}
+	
+	
+	@Override
+	public <TAction extends IAction<TParam, TResult>, TParam, TResult> Disposable subscribe(
+			Function<DescriptorFactory<TActionBinderSet>, ISubscriptionDescriptor<TAction, TParam, TResult>> descriptor) { 
 		
-	@Override
-	public <TAction extends IParameterizedAction<TParam, TResult>, TParam, TResult> void dispatch(
-			Function<TActionBinderSet, IParameterizedActionBinder<TAction, TParam, TResult>> action,
-			TParam parameter,
-			Action begin,
-			Action end, 
-			Function<TAction, IChannel> channel) {
-			dispatchInner(action, parameter, begin, end, channel);
+		Disposable disposable = null;
+		try {
+			SubscriptionDescriptor<TAction, TParam, TResult> desc 
+				= (SubscriptionDescriptor<TAction, TParam, TResult>)descriptor.apply(descriptorFactory);
+			
+			disposable = subscribeInner(
+					desc.getAction(), 
+					desc.getOnNext(), 
+					desc.getObserveOnMainThread(),
+					desc.getObservable(),
+					desc.getChannel(),
+					desc.getPreventClone());
+			
+		} catch (Exception e) {
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
+		}
+		return disposable;
 	}
 	
-	@Override
-	public <TAction extends IParameterizedAction<TParam, TResult>, TParam, TResult> void dispatch(
-			Function<TActionBinderSet, IParameterizedActionBinder<TAction, TParam, TResult>> action,
-			TParam parameter,
-			Action begin) {
-		dispatchInner(action, parameter, begin, null, null);
-	}
-	
-	@Override
-	public <TAction extends IParameterizedAction<TParam, TResult>, TParam, TResult> void dispatch(
-			Function<TActionBinderSet, IParameterizedActionBinder<TAction, TParam, TResult>> action,
-			TParam parameter,
-			Action begin,
-			Action end) {
-		dispatchInner(action, parameter, begin, end, null);
-	}
-	
-	@Override
-	public <TAction extends IParameterizedAction<TParam, TResult>, TParam, TResult> void dispatch(
-			Function<TActionBinderSet, IParameterizedActionBinder<TAction, TParam, TResult>> action,
-			TParam parameter,
-			Function<TAction, IChannel> channel) {
-			dispatchInner(action, parameter, null, null, channel);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> void dispatch(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action, 
-			Action begin, 
-			Action end,
-			Function<TAction, IChannel> channel) {
-			dispatchInner(action, null, begin, end, channel);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> void dispatch(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Action begin) {
-		dispatchInner(action, null, begin, null, null);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> void dispatch(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Action begin,
-			Action end) {
-		dispatchInner(action, null, begin, end, null);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> void dispatch(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action, 
-			Function<TAction, IChannel> channel) {
-			dispatchInner(action, null, null, null, channel);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action, 
-			Action onNext,
-			boolean observerOnMainThread, 
-			Function<Observable<Unit>, 
-			Observable<Unit>> observable,
-			Function<TAction, IChannel> channel) { 
-		return subscribeInner(action, (o -> onNext.run()), observerOnMainThread, observable, channel, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext) {
-		return subscribeInner(action, (o -> onNext.run()), false, null, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext,
-			boolean observerOnMainThread) {
-		return subscribeInner(action, (o -> onNext.run()), observerOnMainThread, null, null, false);
-	}
-	
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext,
-			Function<Observable<Unit>, Observable<Unit>> observable) {
-		return subscribeInner(action, (o -> onNext.run()), false, observable, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext,
-			boolean observerOnMainThread,
-			Function<Observable<Unit>, Observable<Unit>> observable) {
-		return subscribeInner(action, (o -> onNext.run()), observerOnMainThread, observable, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext,
-			Function<TAction, IChannel> channel,
-			boolean observerOnMainThread) {
-		return subscribeInner(action, (o -> onNext.run()), observerOnMainThread, null, channel, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<Unit>> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, Unit>> action,
-			Action onNext,
-			Function<Observable<Unit>, Observable<Unit>> observable,
-			Function<TAction, IChannel> channel) {
-		return subscribeInner(action, (o -> onNext.run()), false, observable, channel, false);
-	}
-
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action, 
+	private <TAction extends IAction<TParam, TResult>, TParam, TResult, TActionBinder extends IActionBinder<?, TParam, TResult>> Disposable subscribeInner(
+			final TAction action,
 			Consumer<TResult> onNext,
 			boolean observerOnMainThread, 
-			Function<Observable<TResult>, Observable<TResult>> observable,
-			Function<TAction, IChannel> channel, 
-			boolean preventClone) {
-		return subscribeInner(action, onNext, observerOnMainThread, observable, channel, preventClone);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext) {
-		return subscribeInner(action, onNext, false, null, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			boolean observerOnMainThread) {
-		return subscribeInner(action, onNext, observerOnMainThread, null, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			Function<Observable<TResult>, Observable<TResult>> observable) {
-		return subscribeInner(action, onNext, false, observable, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			boolean observerOnMainThread,
-			boolean preventClone) {
-		return subscribeInner(action, onNext, observerOnMainThread, null, null, preventClone);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			boolean observerOnMainThread,
-			Function<Observable<TResult>, Observable<TResult>> observable) {
-		return subscribeInner(action, onNext, observerOnMainThread, observable, null, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			boolean observerOnMainThread,
-			Function<Observable<TResult>, Observable<TResult>> observable,
-			Function<TAction, IChannel> channel) {
-		return subscribeInner(action, onNext, observerOnMainThread, observable, channel, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			Function<TAction, IChannel> channel,
-			boolean observerOnMainThread) {
-		return subscribeInner(action, onNext, observerOnMainThread, null, channel, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			Function<Observable<TResult>, Observable<TResult>> observable,
-			Function<TAction, IChannel> channel) {
-		return subscribeInner(action, onNext, false, observable, channel, false);
-	}
-	
-	@Override
-	public <TAction extends IAction<TResult>, TResult> Disposable subscribe(
-			Function<TActionBinderSet, IActionBinder<TAction, TResult>> action,
-			Consumer<TResult> onNext,
-			Function<Observable<TResult>, Observable<TResult>> observable,
-			Function<TAction, IChannel> channel,
-			boolean preventClone) {
-		return subscribeInner(action, onNext, false, observable, channel, preventClone);
-	}
-	
-	@SuppressWarnings("unchecked")
-	private <TAction extends IAction<TResult>, TResult, TActionBinder extends IActionBinder<?, TResult>> Disposable subscribeInner(
-			Function<TActionBinderSet, TActionBinder> binderSet,
-			Consumer<TResult> onNext,
-			boolean observerOnMainThread, 
-			Function<Observable<TResult>, 
-			Observable<TResult>> observable,
+			Function<Observable<TResult>,  Observable<TResult>> observable,
 			Function<TAction, IChannel> channel,
 			boolean preventClone) {
 		try {
-			TActionBinder actionBinder = binderSet.apply(getActions());
-			final TAction action = (TAction) actionBinder.getAction();
 			
 			createChannelIfNull(action);		
 						
@@ -303,10 +129,9 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 			}
 			
 			if (observerOnMainThread) {
-				o = o.observeOn(Simplex.MainThreadScheduler);
+				o = o.observeOn(Simplex.getMainThreadScheduler());
 			}
 			
-			//return o.subscribe(observer::onNext);
 			return o
 					.map(x -> {
 						TResult value = x;
@@ -324,72 +149,63 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 				        }
 				        catch (Exception ex)
 				        {
-				            Simplex.ExceptionSubject.onNext(ex);
-				            Simplex.Logger.write(ex);
+				            Simplex.getExceptionSubject().onNext(ex);
+				            Simplex.getLogger().write(ex);
 				        }
 						return x;
 					})
 					.subscribe(onNext);
 						
 		} catch (Exception e) {
-			Simplex.ExceptionSubject.onNext(e);
-			Simplex.Logger.write(e);
+			Simplex.getExceptionSubject().onNext(e);
+			Simplex.getLogger().write(e);
 		}
 		
 		return null;
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	private <TAction extends IAction<TResult>, TParam, TResult, TActionBinder extends IActionBinder<?, TResult>> void dispatchInner(
-			Function<TActionBinderSet, TActionBinder> binderSet,
-			//final TAction action,
+	private <TAction extends IAction<TParam, TResult>, TParam, TResult, TActionBinder extends IActionBinder<?, TParam, TResult>> void dispatchInner(
+			final TAction action,
 			final TParam parameter,
 			Action begin,
 			Action end, 
 			Function<TAction, IChannel> channel) {
 		if (begin != null) {
-			Simplex.MainThreadScheduler.scheduleDirect(() -> {
+			Simplex.getMainThreadScheduler().scheduleDirect(() -> {
 				try {
 					begin.run();
 				} catch (Exception e) {
-					Simplex.Logger.write(e);
+					Simplex.getLogger().write(e);
 				}
 			});
 		}
 			
-		Action doCompleted = () -> Simplex.MainThreadScheduler.scheduleDirect(() -> {
+		Action doCompleted = () -> Simplex.getMainThreadScheduler().scheduleDirect(() -> {
 			if (end != null) {
 				try {
 					end.run();
 				} catch (Exception e1) {
-					Simplex.Logger.write(e1);
+					Simplex.getLogger().write(e1);
 				}
 			}
 		});
 		
 		try {
 			
-			TActionBinder actionBinder = binderSet.apply(getActions());
-			final TAction action = (TAction) actionBinder.getAction();
-			
 			Observable<TResult> resultObservable = null;
-			if (action instanceof IParameterizedAction<?, ?>) {
-				resultObservable = ((IParameterizedAction<TParam, TResult>)action).process(parameter);
-			} else {
-				resultObservable = ((IAction<TResult>)action).process();
-			}
+			resultObservable = ((IAction<TParam, TResult>)action).process(parameter);
 			
 			resultObservable = resultObservable
-					.timeout(Simplex.DefaultActionTimeoutMilliseconds, TimeUnit.MILLISECONDS)
+					.timeout(Simplex.getDefaultActionTimeoutMilliseconds(), TimeUnit.MILLISECONDS)
 					.onErrorResumeNext(throwable -> {
-						TransformedResult<TResult> transform = ((IAction<TResult>)action).transform(throwable);
+						TransformedResult<TResult> transform = ((IAction<TParam, TResult>)action).transform(throwable);
 						if (transform.isTransformed()) {
-							Simplex.Logger.write("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.");
+							Simplex.getLogger().write("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.");
 							return Observable.just(transform.getResult());
 						}
-						Simplex.Logger.write(throwable);
-                        Simplex.ExceptionSubject.onNext(new Exception(throwable));
+						Simplex.getLogger().write(throwable);
+                        Simplex.getExceptionSubject().onNext(new Exception(throwable));
 						return Observable.empty();
 					})
 					.doOnComplete(doCompleted);
@@ -414,17 +230,17 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
                 
 			}
 		} catch(Exception ex) {
-			Simplex.ExceptionSubject.onNext(ex);
-			Simplex.Logger.write(ex);
+			Simplex.getExceptionSubject().onNext(ex);
+			Simplex.getLogger().write(ex);
 			try {
 				doCompleted.run();
 			} catch (Exception e) {
-				Simplex.Logger.write(ex);
+				Simplex.getLogger().write(ex);
 			}
 		}
 	}
 	
-	private <TResult> void createChannelIfNull(IAction<TResult> action) throws IllegalArgumentException, IllegalAccessException {
+	private <TParam, TResult> void createChannelIfNull(IAction<TParam, TResult> action) throws IllegalArgumentException, IllegalAccessException {
 		Field[] fields = action.getClass().getDeclaredFields();
 		for(Field field : fields) {
 			if (field.getType() == IChannel.class
@@ -436,7 +252,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
 	}
 			
 	@SuppressWarnings("unchecked")
-	private <TResult> Subject<ChannelWrapper<TResult>> getOrAddObservableSource(IAction<TResult> action) throws Exception {
+	private <TParam, TResult> Subject<ChannelWrapper<TResult>> getOrAddObservableSource(IAction<TParam, TResult> action) throws Exception {
 		Subject<ChannelWrapper<TResult>> subject = null;
 		
 		// Default채널의 Id를 키로 등록한다.
@@ -451,7 +267,7 @@ public class Store<TActionBinderSet extends IActionBinderSet> implements IAction
         return subject;
 	}
 
-	private <TAction extends IAction<TResult>, TParam, TResult> IChannel getChannel(
+	private <TAction extends IAction<TParam, TResult>, TParam, TResult> IChannel getChannel(
 			TAction action,
 			Function<TAction, IChannel> channel) throws Exception {
 		IChannel ch = null;
