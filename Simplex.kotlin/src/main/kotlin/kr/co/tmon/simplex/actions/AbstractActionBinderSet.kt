@@ -14,7 +14,7 @@ abstract class AbstractActionBinderSet : IActionBinderSet {
     /**
      * 단위작업 목록
      */
-    val actionBinders: ConcurrentHashMap<String, IActionBinder<*,*>> = ConcurrentHashMap()
+    val actionBinders: ConcurrentHashMap<String, IActionBinder<*,*,*>> = ConcurrentHashMap()
 
     /**
      * 단위작업의 묶음 목록
@@ -26,30 +26,19 @@ abstract class AbstractActionBinderSet : IActionBinderSet {
      * @param actionBinderKey 단위작업의 등록 키
      * @return 단위작업 바인더 인스턴스
      */
-    inline fun <reified TAction : IAction<TResult>, TResult> getOrAddAction(@NotNull actionBinderKey: String)
-		: IActionBinder<TAction, TResult> {
+    inline fun <reified TAction : IAction<TParam, TResult>, TParam, TResult> getOrAddAction(@NotNull actionBinderKey: String)
+		: IActionBinder<TAction, TParam, TResult> {
         @Suppress("UNCHECKED_CAST")
-		return getOrAddInner(actionBinderKey) { ActionBinder<TAction, TResult>() } as IActionBinder<TAction, TResult>
+		return getOrAddInner(actionBinderKey) { ActionBinder<TAction, TParam, TResult>() } as IActionBinder<TAction, TParam, TResult>
 	}
 
-    /**
-     * 단위작업 바인더를 조회합니다. 단위작업이 등록되어 있지 않으면 새롭게 등록하고 해당 객체를 리턴합니다.
-     * @param actionBinderKey 단위작업의 등록 키
-     * @return 단위작업 바인더 인스턴스
-     */
-    inline fun <reified TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> getOrAddParameterizedAction(@NotNull actionBinderKey: String)
-		: IParameterizedActionBinder<TAction, TParam, TResult> {
-        @Suppress("UNCHECKED_CAST")
-		return getOrAddInner(actionBinderKey) { ParameterizedActionBinder<TAction, TParam, TResult>() } as IParameterizedActionBinder<TAction, TParam, TResult>
-	}
-
-    inline fun <reified TActionBinder : IActionBinder<*,*>> getOrAddInner(@NotNull actionBinderKey: String, valueFactory: (String) -> TActionBinder)
-            : IActionBinder<*,*> {
+    inline fun <reified TActionBinder : IActionBinder<*,*,*>> getOrAddInner(@NotNull actionBinderKey: String, valueFactory: (String) -> TActionBinder)
+            : IActionBinder<*,*,*> {
         if (actionBinderKey.isEmpty())
-            throw IllegalArgumentException("$actionBinderKey 오류")
+            throw IllegalArgumentException("$actionBinderKey 값이 없습니다.")
 
         if (!actionBinders.containsKey(actionBinderKey))
-            actionBinders.put(actionBinderKey, valueFactory(actionBinderKey) as IActionBinder<*,*>)
+            actionBinders.put(actionBinderKey, valueFactory(actionBinderKey) as IActionBinder<*,*,*>)
 
         return actionBinders.get(actionBinderKey) as TActionBinder
     }
@@ -68,6 +57,3 @@ abstract class AbstractActionBinderSet : IActionBinderSet {
         return actionSet!!
     }
 }
-
-
-

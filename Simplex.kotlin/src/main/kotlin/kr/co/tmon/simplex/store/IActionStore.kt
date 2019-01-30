@@ -7,21 +7,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Action
 
 interface IActionStore<TActionSet> {
-    /**
-     * 액션(단위 작업)의 처리를 요청합니다. 이 요청에 대한 처리는 비동기로 수행됩니다.
-     * 액션이 수행되면 결과를 발행시키며, 결과는 구독자에게 전달이 됩니다.
-     * 이때 특정 구독자에게만 결과를 방행시키고 싶으면 Channel을 구현하여 통신하여야 합니다.
-     * @param <TResult> 처리 결과 타입
-     * @param action 단위 작업
-     * @param begin 액션 처리 직전에 수행 (메인 스레드에서 수행됩니다.)
-     * @param end 액션 처리 직후에 수행 (메인 스레드에서 수행됩니다.)
-     * @param channel 구독자와 연결할 채널(그룹)
-     */
-    fun <TAction : IAction<TResult>, TResult> dispatch(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
-        begin: Action? = null,
-        end: Action? = null,
-        channel: Function1<TAction, IChannel>? = null)
 
     /**
      * 액션(단위 작업)의 처리를 요청합니다. 이 요청에 대한 처리는 비동기로 수행됩니다.
@@ -35,9 +20,9 @@ interface IActionStore<TActionSet> {
      * @param end 액션 처리 직후에 수행 (메인 스레드에서 수행됩니다.)
      * @param channel 구독자와 연결할 채널(그룹)
      */
-    fun <TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
-        action: Function1<TActionSet, IParameterizedActionBinder<TAction, TParam, TResult>>,
-        parameters: TParam,
+    fun <TAction : IAction<TParam, TResult>, TParam, TResult> dispatch(
+        action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
+        parameters: TParam? = null,
         begin: Action? = null,
         end: Action? = null,
         channel: Function1<TAction, IChannel>? = null)
@@ -60,12 +45,12 @@ interface IActionStore<TActionSet> {
      * @param preventClone 수행 결과값의 원본전달 여부 (구현안함)
      * @return 구독 제거 Disposable
      */
-    fun <TAction : IAction<TResult>, TResult>subscribe(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
-        onNext: (TResult) -> Unit,
-        observeOnMainThread: Boolean = false,
-        observable : Function1<Observable<TResult>, Observable<TResult>>? = null,
-        channel: Function1<TAction, IChannel>? = null,
-        preventClone: Boolean = false
+    fun <TAction : IAction<TParam, TResult>, TParam, TResult> subscribe(
+            action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
+            onNext: (TResult) -> Unit,
+            observeOnMainThread: Boolean = false,
+            observable : Function1<Observable<TResult>, Observable<TResult>>? = null,
+            channel: Function1<TAction, IChannel>? = null,
+            preventClone: Boolean = false
     ) : Disposable?
 }

@@ -12,28 +12,20 @@ class DisposableStore<TActionSet>(private val store: IActionStore<TActionSet>, p
 
     private val managedDisposables: ConcurrentHashMap<String, CompositeDisposable> = ConcurrentHashMap()
 
-    override fun <TAction : IAction<TResult>, TResult> dispatch(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
-        begin: Action?,
-        end: Action?,
-        channel: Function1<TAction, IChannel>?) {
-        store.dispatch(action, begin, end, channel)
-    }
-
-    override fun <TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
-        action: Function1<TActionSet, IParameterizedActionBinder<TAction, TParam, TResult>>,
-        parameters: TParam,
+    override fun <TAction : IAction<TParam, TResult>, TParam, TResult> dispatch(
+        action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
+        parameters: TParam?,
         begin: Action?,
         end: Action?,
         channel: Function1<TAction, IChannel>? ) {
         store.dispatch(action, parameters, begin, end, channel)
     }
 
-    override fun <TAction : IAction<R>, R> subscribe(
-        action: Function1<TActionSet, IActionBinder<TAction, R>>,
-        onNext: (R) -> Unit,
+    override fun <TAction : IAction<TParam, TResult>, TParam, TResult> subscribe(
+        action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
+        onNext: (TResult) -> Unit,
         observeOnMainThread: Boolean,
-        observable: Function1<Observable<R>, Observable<R>>?,
+        observable: Function1<Observable<TResult>, Observable<TResult>>?,
         channel: Function1<TAction, IChannel>?,
         preventClone: Boolean
     ): Disposable? {
