@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tmon.Simplex.Channels
 {
-    internal class Channel : IChannel
+    public struct Channel
     {
-        public string Id { get; } = Guid.NewGuid().ToString();
-    }
+        public string Id { get { return Ids?[0]; } }
 
-    internal class ChannelZip : IChannel
-    {
-        public string Id { get; } = Guid.NewGuid().ToString();
-
-        internal IEnumerable<IChannel> Channels { get; }
-
-        internal ChannelZip(IEnumerable<IChannel> channels)
+        internal string[] Ids { get; set; }
+        
+        public static Channel operator |(Channel ch1, Channel ch2)
         {
-            this.Channels = channels;
-        }   
+            return new Channel
+            {
+                Ids = ch1.Ids.Union(ch2.Ids).ToArray()
+            };
+        }
     }
+
 }

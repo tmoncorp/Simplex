@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive;
 using System.Threading;
-using Tmon.Simplex.Channels;
 
 namespace Tmon.Simplex.Actions
 {
@@ -25,13 +23,6 @@ namespace Tmon.Simplex.Actions
         /// </summary>
         /// <returns>반환할 결과 값</returns>
         IObservable<TResult> Process();
-
-        /// <summary>
-        /// 다중 채널의 인터페이스를 단일 채널 인터페이스로 리턴
-        /// </summary>
-        /// <param name="channels"></param>
-        /// <returns></returns>
-        IChannel Zip(params IChannel[] channels);
     }
 
     /// <summary>

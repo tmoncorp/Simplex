@@ -1,15 +1,13 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tmon.Simplex.Channels;
-using Tmon.Simplex.Extensions;
 
 namespace Tmon.Simplex.Actions
 {
     public abstract class AbstractAction<TResult> : IAction<TResult>
     {
-        internal IChannel Default { get; }
+        internal Channel Default { get; }
 
         public abstract IObservable<TResult> Process();
 
@@ -18,9 +16,6 @@ namespace Tmon.Simplex.Actions
             result = default;
             return false;
         }
-
-        public IChannel Zip(params IChannel[] channels)
-            => channels.Zip();
     }
 
     public abstract class AbstractAction<TParam, TResult>
