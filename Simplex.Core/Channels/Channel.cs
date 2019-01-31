@@ -6,7 +6,7 @@ namespace Tmon.Simplex.Channels
 {
     public struct Channel
     {
-        public string Id { get { return Ids?[0]; } }
+        internal string Id { get { return Ids?[0]; } }
 
         internal string[] Ids { get; set; }
         
