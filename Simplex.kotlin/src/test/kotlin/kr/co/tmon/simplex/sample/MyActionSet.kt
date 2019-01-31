@@ -6,17 +6,17 @@ import io.reactivex.Observable
 
 class MyActionSet : AbstractActionBinderSet() {
 
-    val sendSignal: IActionBinder<SendSignal, Unit>
+    val sendSignal: IActionBinder<SendSignal, Unit, Unit>
         get() = getOrAddAction("sendSignal")
 
-    val getBoolean: IParameterizedActionBinder<GetBoolean, Boolean, Boolean>
-        get() = getOrAddParameterizedAction("getBoolean")
+    val getBoolean: IActionBinder<GetBoolean, Boolean, Boolean>
+        get() = getOrAddAction("getBoolean")
 
-    val getInteger: IParameterizedActionBinder<GetIntegerString, Int, String>
-        get() = getOrAddParameterizedAction("getInteger")
+    val getInteger: IActionBinder<GetIntegerString, Int, String>
+        get() = getOrAddAction("getInteger")
 }
 
-class GetBoolean : AbstractParameterizedAction<Boolean, Boolean>() {
+class GetBoolean : AbstractAction<Boolean, Boolean>() {
     var ch1: IChannel? = null
 
     override fun process(param: Boolean?): Observable<Boolean> {
@@ -24,7 +24,7 @@ class GetBoolean : AbstractParameterizedAction<Boolean, Boolean>() {
     }
 }
 
-class GetIntegerString : AbstractParameterizedAction<Int, String>() {
+class GetIntegerString : AbstractAction<Int, String>() {
     val ch1: IChannel by lazy { Channel() }
     val ch2: IChannel by lazy { Channel() }
 
@@ -34,7 +34,7 @@ class GetIntegerString : AbstractParameterizedAction<Int, String>() {
 }
 
 @Unsubscribe
-class SendSignal : AbstractAction<Unit>() {
+class SendSignal : AbstractUnitAction<Unit>() {
     override fun process(): Observable<Unit> {
         return Observable.just(Unit)
     }

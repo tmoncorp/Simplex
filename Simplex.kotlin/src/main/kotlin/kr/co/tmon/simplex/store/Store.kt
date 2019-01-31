@@ -25,40 +25,67 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
     private val actions: TActionSet = factory()
     private val observableSources: ConcurrentHashMap<String, Any> = ConcurrentHashMap()
 
-    override fun <TAction : IAction<TResult>, TResult> dispatch(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
+    override fun <TAction : IAction<TParam, TResult>, TParam, TResult> dispatch(
+        action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
+        parameters: TParam?,
         begin: Action?,
         end: Action?,
         channel: Function1<TAction, IChannel>?) {
-        dispatchInner(action, null, channel, begin, end)
-	}
 
-    override fun <TAction : IParameterizedAction<TParam, TResult>, TParam, TResult> dispatch(
-        action: Function1<TActionSet, IParameterizedActionBinder<TAction, TParam, TResult>>,
-        parameters: TParam,
-        begin: Action?,
-        end: Action?,
-        channel: Function1<TAction, IChannel>?) {
-        dispatchInner(action, parameters, channel, begin, end)
+        Simplex.MainThreadScheduler.run { begin?.run() }
+        val doCompleted = Action { Simplex.MainThreadScheduler.run { end?.run() } }
+
+        try {
+            val binder = action(actions)
+            val resultObservable = binder.action.process(parameters)
+                    .timeout(Simplex.DefaultActionTimeout, TimeUnit.MILLISECONDS)
+                    .onErrorResumeNext { exception: Throwable ->
+                        val transform = binder.action.transform(exception)
+                        if (transform.isTransformed) {
+                            Simplex.Logger?.write?.invoke("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.")
+                            Observable.just(transform.result)
+                        }
+                        else {
+                            Simplex.Logger?.write?.invoke(exception.message ?: "")
+                            Simplex.ExceptionSubject?.onNext(exception)
+                            Observable.empty()
+                        }
+                    }
+                    .doFinally(doCompleted)
+
+            if (binder.action::class.findAnnotation<Unsubscribe>() != null) {
+                createChannelIfNull(binder.action)
+                //더미
+                resultObservable.subscribe()
+            }
+            else {
+                //채널이 생성되지 않았으면 기본 Channel클래스로 생성
+                createChannelIfNull(binder.action)
+                //채널 선택
+                val ch = channel?.invoke(binder.action) ?: getDefaultChannel(binder.action)
+                //액션에 해당하는 source 선택
+                val observer = this.getOrAddObservableSource(binder.action)
+                //채널 추가
+                resultObservable.wrap(ch)
+                        .subscribe { observer.onNext(it) }
+            }
+        }
+        catch (ex: Exception) {
+            Simplex.ExceptionSubject?.onNext(ex)
+            Simplex.Logger?.write?.invoke(ex.stackTrace.toString())
+            doCompleted.run()
+        }
     }
 
-    override fun <TAction : IAction<TResult>, TResult>subscribe(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
+
+    override fun <TAction : IAction<TParam, TResult>, TParam, TResult> subscribe(
+        action: Function1<TActionSet, IActionBinder<TAction, TParam, TResult>>,
         onNext: (TResult) -> Unit,
         observeOnMainThread: Boolean,
         observable : Function1<Observable<TResult>, Observable<TResult>>?,
         channel: Function1<TAction, IChannel>?,
         preventClone: Boolean
     ) : Disposable? {
-        return subscribeInner(action, onNext, observable, channel, observeOnMainThread)
-    }
-
-    private fun <TAction : IAction<TResult>, TResult> subscribeInner(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
-        onNext: (TResult) -> Unit,
-        observable: Function1<Observable<TResult>, Observable<TResult>>? = null,
-        channel: Function1<TAction, IChannel>? = null,
-        observeOnMainThread: Boolean = false) : Disposable {
 
         val binder = action.invoke(actions)
         //채널이 생성되지 않았으면 기본 Channel클래스로 생성
@@ -77,69 +104,17 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         return o.subscribe{ onNext(it) }
     }
 
-    private fun <TAction : IAction<TResult>, TParam, TResult> dispatchInner(
-        action: Function1<TActionSet, IActionBinder<TAction, TResult>>,
-        param: TParam,
-        channel: Function1<TAction, IChannel>?  = null,
-        begin: Action? = null,
-        end: Action? = null) {
-
-        Simplex.MainThreadScheduler.run { begin?.run() }
-        val doCompleted = Action { Simplex.MainThreadScheduler.run { end?.run() } }
-
-        try {
-            val binder = action(actions)
-            val resultObservable = binder.action.toObservable(param)
-                .timeout(Simplex.DefaultActionTimeout, TimeUnit.MILLISECONDS)
-                .onErrorResumeNext { exception: Throwable ->
-                    val transform = binder.action.transform(exception)
-                    if (transform.isTransformed) {
-                        Simplex.Logger?.write?.invoke("예외가 발생되지 않고 데이터로 트랜스폼되어 배출되었습니다.")
-                        Observable.just(transform.result)
-                    }
-                    else {
-                        Simplex.Logger?.write?.invoke(exception.message ?: "")
-                        Simplex.ExceptionSubject?.onNext(exception)
-                        Observable.empty()
-                    }
-                }
-                .doFinally(doCompleted)
-
-            if (binder.action::class.findAnnotation<Unsubscribe>() != null) {
-                    createChannelIfNull(binder.action)
-                    //더미
-                    resultObservable.subscribe()
-            }
-            else {
-                //채널이 생성되지 않았으면 기본 Channel클래스로 생성
-                createChannelIfNull(binder.action)
-                //채널 선택
-                val ch = channel?.invoke(binder.action) ?: getDefaultChannel(binder.action)
-                //액션에 해당하는 source 선택
-                val observer = this.getOrAddObservableSource(binder.action)
-                //채널 추가
-                resultObservable.wrap(ch)
-                    .subscribe { observer.onNext(it) }
-            }
-        }
-        catch (ex: Exception) {
-            Simplex.ExceptionSubject?.onNext(ex)
-            Simplex.Logger?.write?.invoke(ex.stackTrace.toString())
-            doCompleted.run()
-        }
-    }
-
 
     fun toDisposableStore(subscriberId: String): DisposableStore<TActionSet> {
         return DisposableStore(this, subscriberId)
     }
 
-    private fun <TResult> getDefaultChannel(action: IAction<TResult>): IChannel {
-        val abstractAction = action as? AbstractAction<TResult>
+    private fun <TParam, TResult> getDefaultChannel(action: IAction<TParam, TResult>): IChannel {
+        val abstractAction = action as? AbstractAction<TParam, TResult>
         return abstractAction?.default ?: throw IllegalAccessException("${action.javaClass.name}에서 기본 채널을 가져올 수 있는 방법이 구현되지 않았습니다.")
     }
 
-    private fun <TResult> getOrAddObservableSource(action: IAction<TResult>) : PublishSubject<Pair<IChannel, TResult>> {
+    private fun <TParam, TResult> getOrAddObservableSource(action: IAction<TParam, TResult>) : PublishSubject<Pair<IChannel, TResult>> {
         // Default채널의 Id를 키로 등록한다.
         val key = getDefaultChannel(action).id
 
@@ -152,10 +127,10 @@ class Store<TActionSet>(factory: () -> TActionSet) : IActionStore<TActionSet> {
         return observableSources.get(key) as PublishSubject<Pair<IChannel, TResult>>
     }
 
-    private fun <TResult> createChannelIfNull(action: IAction<TResult>) {
+    private fun <TParam, TResult> createChannelIfNull(action: IAction<TParam, TResult>) {
         for (property in action::class.declaredMemberProperties) {
             @Suppress("UNCHECKED_CAST")
-            val channelProperty = property as? KProperty1<IAction<TResult>, IChannel>
+            val channelProperty = property as? KProperty1<IAction<TParam, TResult>, IChannel>
             if (channelProperty?.get(action) == null) {
                 // 필드 생성
                 if (property is KMutableProperty<*>)
