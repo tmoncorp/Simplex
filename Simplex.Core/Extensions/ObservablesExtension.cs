@@ -18,12 +18,12 @@ namespace Tmon.Simplex.Extensions
             return new ThrottleFirstObservable<T>(source, timeSource, timespan);
         }
 
-        internal static IObservable<(IChannel, T)> Wrap<T>(this IObservable<T> source, IChannel channel)
+        internal static IObservable<(Channel, T)> Wrap<T>(this IObservable<T> source, Channel channel)
         {
             return source.SelectMany(x => Observable.Return((channel, x)));
         }
 
-        internal static IObservable<T> Unwrap<T>(this IObservable<(IChannel channel, T result)> source)
+        internal static IObservable<T> Unwrap<T>(this IObservable<(Channel channel, T result)> source)
         {
             return source.SelectMany(x => Observable.Return(x.result));
         }

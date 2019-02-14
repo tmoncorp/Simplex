@@ -10,13 +10,13 @@ namespace SimplexDemo.Actions
 {
     public class GetBoolean : AbstractAction<bool, bool>
     {
-        public IChannel ExCh1 { get; }
+        public Channel ExCh1 { get; }
 
-        public IChannel ExCh2 { get; }
+        public Channel ExCh2 { get; }
 
-        public IChannel ExCh3 { get; }
+        public Channel ExCh3 { get; }
 
-        public IChannel ExCh4 { get; }
+        public Channel ExCh4 { get; }
 
         public override IObservable<bool> Process(bool param)
         {
@@ -26,9 +26,11 @@ namespace SimplexDemo.Actions
 
     public class GetIntegerString : AbstractAction<int, string>
     {
-        public IChannel ExCh1 { get; }
+        public Channel ExCh1 { get; }
 
-        public IChannel ExCh2 { get; }
+        public Channel ExCh2 { get; }
+
+        public Channel ExCh3 { get; }
 
         public override IObservable<string> Process(int param)
         {

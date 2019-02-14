@@ -27,7 +27,7 @@ namespace Tmon.Simplex.Store
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TResult>;
 
@@ -49,7 +49,7 @@ namespace Tmon.Simplex.Store
             TParam parameter,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TParam, TResult>;
 
@@ -70,7 +70,7 @@ namespace Tmon.Simplex.Store
             Action onNext,
             bool observeOnMainThread = false,
             Func<IObservable<Unit>, IObservable<Unit>> observable = null,
-            Func<TAction, IChannel> channel = null)
+            Func<TAction, Channel> channel = null)
             where TAction : IAction<Unit>;
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Tmon.Simplex.Store
             Action<TResult> onNext,
             bool observeOnMainThread = false,
             Func<IObservable<TResult>, IObservable<TResult>> observable = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             bool preventClone = false)
             where TAction : IAction<TResult>;
     }

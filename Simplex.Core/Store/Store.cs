@@ -32,7 +32,7 @@ namespace Tmon.Simplex.Store
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TResult>
             => DispatchInner(action, parameter: default(object), channel: channel, begin: begin, end: end, cancellationToken: cancellationToken);
@@ -42,7 +42,7 @@ namespace Tmon.Simplex.Store
             TParam parameter,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TParam, TResult>
             => DispatchInner(action, parameter: parameter, channel: channel, begin: begin, end: end, cancellationToken: cancellationToken);
@@ -52,7 +52,7 @@ namespace Tmon.Simplex.Store
             Action onNext,
             bool observeOnMainThread = false,
             Func<IObservable<Unit>, IObservable<Unit>> observable = null,
-            Func<TAction, IChannel> channel = null)
+            Func<TAction, Channel> channel = null)
             where TAction : IAction<Unit>
             => SubscribeInner(action, (x => onNext()), observable, channel, observeOnMainThread, false);
         
@@ -61,7 +61,7 @@ namespace Tmon.Simplex.Store
             Action<TResult> onNext,
             bool observeOnMainThread = false,
             Func<IObservable<TResult>, IObservable<TResult>> observable = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             bool preventClone = false)
             where TAction : IAction<TResult>
             => SubscribeInner(action, onNext, observable, channel, observeOnMainThread, preventClone);
@@ -70,19 +70,19 @@ namespace Tmon.Simplex.Store
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             Action<TResult> onNext,
             Func<IObservable<TResult>, IObservable<TResult>> observable = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             bool observeOnMainThread = false,
             bool preventClone = false)
             where TAction : IAction<TResult>
         {
             var act = action.Invoke(Actions);
             //채널이 생성되지 않았으면 기본 Channel클래스로 생성
-            CreateChannelIfNull(act.Action);
+            ValidateChannelId(act.Action);
             //채널 선택
             var ch = channel?.Invoke(act.Action) ?? GetDefaultChannel(act.Action);
             //액션에 해당하는 source 선택
             var source = this.GetOrAddObservableSource<TResult>(act.Action)
-                .Where(x => x.channel.Contains(ch))
+                .Where(x => x.channel.Ids.Intersect(ch.Ids).Any())
                 .Unwrap();
 
             var o = observable?.Invoke(source) ?? source;
@@ -123,7 +123,7 @@ namespace Tmon.Simplex.Store
         protected void DispatchInner<TAction, TParam, TResult>(
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             TParam parameter,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             Action begin = null,
             Action end = null,
             CancellationToken? cancellationToken = null)
@@ -161,7 +161,7 @@ namespace Tmon.Simplex.Store
                 else
                 {
                     //채널이 생성되지 않았으면 기본 Channel클래스로 생성
-                    CreateChannelIfNull(act.Action);
+                    ValidateChannelId(act.Action);
                     //채널 선택
                     var ch = channel?.Invoke(act.Action) ?? GetDefaultChannel(act.Action);
                     //액션에 해당하는 source 선택
@@ -186,7 +186,7 @@ namespace Tmon.Simplex.Store
         public DisposableStore<TActionBinderSet> ToDisposableStore(string subscriberId)
             => new DisposableStore<TActionBinderSet>(this, subscriberId);
 
-        protected virtual IChannel GetDefaultChannel<TResult>(IAction<TResult> action)
+        protected virtual Channel GetDefaultChannel<TResult>(IAction<TResult> action)
         {
             if (action is AbstractAction<TResult> act)
                 return act.Default;
@@ -194,26 +194,27 @@ namespace Tmon.Simplex.Store
             throw new NotImplementedException($"{action.GetType().FullName}에서 Channel를 가져올 수 있는 방법이 구현되지 않았습니다.");
         }
 
-        private Subject<(IChannel channel, TResult result)> GetOrAddObservableSource<TResult>(IAction<TResult> action)
+        private Subject<(Channel channel, TResult result)> GetOrAddObservableSource<TResult>(IAction<TResult> action)
         {
             // Default채널의 Id를 키로 등록한다.
             var key = GetDefaultChannel(action).Id;
-            return (Subject<(IChannel, TResult)>)observableSources.GetOrAdd(key, new Subject<(IChannel, TResult)>());
+            return (Subject<(Channel, TResult)>)observableSources.GetOrAdd(key, new Subject<(Channel, TResult)>());
         }
 
-        private void CreateChannelIfNull<TResult>(IAction<TResult> action)
+        private void ValidateChannelId<TResult>(IAction<TResult> action)
         {
-            //IChannel 타입의 프로퍼티 필터링
+            //Channel 타입의 프로퍼티 필터링
             var propertyInfos = from p in action.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                                where p.PropertyType == typeof(IChannel)
+                                where p.PropertyType == typeof(Channel)
                                 select p;
 
             foreach (var property in propertyInfos)
             {
                 //프로퍼티 값이 생성되지 않은경우 Channel 객체 생성
-                if (!(property.GetValue(action) is IChannel channel))
+                if (property.GetValue(action) is Channel channel
+                    && string.IsNullOrWhiteSpace(channel.Id))
                 {
-                    channel = new Channel();
+                    channel.Ids = new string[] { Guid.NewGuid().ToString() };
                     if (property.CanWrite)
                     {
                         property.SetValue(action, channel);

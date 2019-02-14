@@ -35,7 +35,7 @@ namespace Tmon.Simplex.Store
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TResult>
             => Store.Dispatch(action, begin, end, channel, cancellationToken);
@@ -45,7 +45,7 @@ namespace Tmon.Simplex.Store
             TParam parameter,
             Action begin = null,
             Action end = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             CancellationToken? cancellationToken = null)
             where TAction : IAction<TParam, TResult>
             => Store.Dispatch(action, parameter, begin, end, channel, cancellationToken);
@@ -55,7 +55,7 @@ namespace Tmon.Simplex.Store
             Action onNext,
             bool observeOnMainThread = false,
             Func<IObservable<Unit>, IObservable<Unit>> observable = null,
-            Func<TAction, IChannel> channel = null)
+            Func<TAction, Channel> channel = null)
             where TAction : IAction<Unit>
             => AddDisposable(Store.Subscribe(action, onNext, observeOnMainThread, observable, channel));
        
@@ -64,7 +64,7 @@ namespace Tmon.Simplex.Store
             Action<TResult> onNext,
             bool observeOnMainThread = false,
             Func<IObservable<TResult>, IObservable<TResult>> observable = null,
-            Func<TAction, IChannel> channel = null,
+            Func<TAction, Channel> channel = null,
             bool preventClone = false)
             where TAction : IAction<TResult>
             => AddDisposable(Store.Subscribe(action, onNext, observeOnMainThread, observable, channel, preventClone));
