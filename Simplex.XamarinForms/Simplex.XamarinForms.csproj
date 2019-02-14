@@ -4,6 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Tmon mobile labs</Authors>
+    <Company>Tmon</Company>
+    <PackageId>Tmon.Simplex.XamarinForms</PackageId>
+    <Product>Tmon.Simplex.XamarinForms</Product>
+    <AssemblyName>Tmon.Simplex.XamarinForms</AssemblyName>
+    <RootNamespace>Tmon.Simplex</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
