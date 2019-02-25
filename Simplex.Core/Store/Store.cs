@@ -215,22 +215,7 @@ namespace Tmon.Simplex.Store
                     && string.IsNullOrWhiteSpace(channel.Id))
                 {
                     channel.Ids = new string[] { Guid.NewGuid().ToString() };
-                    if (property.CanWrite)
-                    {
-                        property.SetValue(action, channel);
-                    }
-                    else
-                    {
-                        //set메소드가 없는 경우, backing필드를 검색하여 fieldInfo 생성
-                        var bindingFlag = BindingFlags.Instance | BindingFlags.NonPublic;
-                        var fieldPropertyInfo = property.GetBackingField(action.GetType(), bindingFlag);
-
-                        //백 필드를 못 찾으면 채널생성 skip
-                        if (fieldPropertyInfo == null)
-                            continue;
-
-                        fieldPropertyInfo.SetValue(action, channel);
-                    }
+                    property.SetValueDeeply(action, channel);
                 }
             }
         }

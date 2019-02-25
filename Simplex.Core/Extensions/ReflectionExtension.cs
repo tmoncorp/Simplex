@@ -25,5 +25,25 @@ namespace Tmon.Simplex.Extensions
             }
             return fInfo;
         }
+
+        internal static void SetValueDeeply(this PropertyInfo propertyInfo, object obj, object value)
+        {
+            if (propertyInfo.CanWrite)
+            {
+                propertyInfo.SetValue(obj, value);
+            }
+            else
+            {
+                //set메소드가 없는 경우, backing필드를 검색하여 fieldInfo 생성
+                var bindingFlag = BindingFlags.Instance | BindingFlags.NonPublic;
+                var fieldPropertyInfo = propertyInfo.GetBackingField(obj.GetType(), bindingFlag);
+
+                //백 필드를 못 찾으면 채널생성 skip
+                if (fieldPropertyInfo == null)
+                    return;
+
+                fieldPropertyInfo.SetValue(obj, value);
+            }
+        }
     }
 }
