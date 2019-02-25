@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Text;
 using Tmon.Simplex.Actions;
+using Tmon.Simplex.Demo.Models;
 
-namespace SimplexDemo.Actions
+namespace Tmon.Simplex.Demo.Actions
 {
     public class MyActionSet : AbstractActionBinderSet
     {
@@ -25,5 +26,8 @@ namespace SimplexDemo.Actions
     {
         public IActionBinder<GetBoolean, bool, bool> GetBoolean2
             => GetOrAdd<GetBoolean, bool, bool>();
+
+        public IActionBinder<GetRealtimeKeywordList, IEnumerable<PopularKeyword>> GetRealtimeKeywordList
+            => GetOrAdd<GetRealtimeKeywordList, IEnumerable<PopularKeyword>>();
     }
 }

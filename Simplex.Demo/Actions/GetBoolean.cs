@@ -6,7 +6,7 @@ using System.Text;
 using Tmon.Simplex.Actions;
 using Tmon.Simplex.Channels;
 
-namespace SimplexDemo.Actions
+namespace Tmon.Simplex.Demo.Actions
 {
     public class GetBoolean : AbstractAction<bool, bool>
     {

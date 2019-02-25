@@ -4,9 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <AssemblyName>Tmon.Simplex.Demo</AssemblyName>
+    <RootNamespace>Tmon.Simplex.Demo</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />
   </ItemGroup>
 
