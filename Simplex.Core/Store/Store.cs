@@ -97,7 +97,8 @@ namespace Tmon.Simplex.Store
                     try
                     {
                         //프리미티브, 열거형 타입이거나, 복사 방지 옵션이 설정되었으면 복사하지 않음
-                        if (!(preventClone
+                        if (x != null 
+                            && !(preventClone
                             || typeof(TResult) == typeof(Unit)
                             || typeof(TResult).IsPrimitive
                             || typeof(IEnumerable).IsAssignableFrom(x.GetType())))
