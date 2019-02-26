@@ -92,7 +92,7 @@ namespace Tmon.Simplex
         /// <typeparam name="TActionSetGroup"></typeparam>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static Store<TActionBinderSet> GetStore<TActionBinderSet>()
+        public static IActionStore<TActionBinderSet> GetStore<TActionBinderSet>()
             where TActionBinderSet : class, IActionBinderSet, new()
         {
             var typeName = typeof(Store<TActionBinderSet>).FullName;
