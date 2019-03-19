@@ -15,8 +15,17 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageId>Simplex.Android</PackageId>
+    <Authors>Tmon mobile labs</Authors>
+    <Owners>Tmon Inc.</Owners>
+    <Summary>Soc framework.</Summary>
+    <Title>Simplex.Android</Title>
+    <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
+    <Description>Simplex for Android</Description>
+    <ReleaseVersion>1.1.3</ReleaseVersion>
+    <PackageVersion>1.0.1</PackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +38,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -54,9 +64,11 @@
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="4.0.0" />
-    <PackageReference Include="System.Reactive.Linq" Version="4.0.0" />
-    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2.1" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Interfaces">
+      <Version>4.1.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\strings.xml" />

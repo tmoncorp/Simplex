@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Tmon.Simplex.Platform</id>
+    <version>$version$</version>
+    <authors>Tmon mobile labs</authors>
+    <owners>Tmon Inc.</owners>
+    <projectUrl>https://github.com/tmoncorp/Simplex</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Rx를 활용한 구독패턴의 단방향성 Soc 프레임워크</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyrights© 2018 Tmon Inc. All rights reserved.</copyright>
+    <dependencies>
+      <group targetFramework="MonoAndroid7.1">
+        <dependency id="Tmon.Simplex.Core" version="1.0" exclude="Build,Analyzers" />
+	<dependency id="System.Reactive" version="4.1.3" />
+	<dependency id="System.Reactive.Linq" version="4.1.3" />
+      </group>
+      
+      <group targetFramework="Xamarin.iOS0.0">
+        <dependency id="Tmon.Simplex.Core" version="1.0" exclude="Build,Analyzers" />
+	<dependency id="System.Reactive" version="4.1.3" />
+	<dependency id="System.Reactive.Linq" version="4.1.3" />
+      </group>
+
+<!--
+      <group targetFramework="uap10.0">
+        <dependency id="Tmon.Simplex.Core" version="1.0" exclude="Build,Analyzers" />
+      </group>      
+-->
+      </dependencies>
+  </metadata>
+  <files>
+    
+    <!-- iOS reference assemblies -->
+    <file src="..\Simplex.iOS\bin\$configuration$\Tmon.Simplex.dll" target="lib\xamarinios\Tmon.Simplex.dll" />
+    <file src="..\Simplex.iOS\bin\$configuration$\Tmon.Simplex.pdb" target="lib\xamarinios\Tmon.Simplex.pdb" />
+
+    <!-- Android reference assemblies -->
+    <file src="..\Simplex.Android\bin\$configuration$\Tmon.Simplex.dll" target="lib\MonoAndroid\Tmon.Simplex.dll" />
+    <file src="..\Simplex.Android\bin\$configuration$\Tmon.Simplex.pdb" target="lib\MonoAndroid\Tmon.Simplex.pdb" />
+
+    <!-- UWP reference assemblies -->
+<!--
+    <file src="..\Simplex.UWP\bin\$configuration$\Tmon.Simplex.dll" target="lib\uap10.0\Tmon.Simplex.dll" />
+    <file src="..\Simplex.UWP\bin\$configuration$\Tmon.Simplex.pdb" target="lib\uap10.0\Tmon.Simplex.pdb" />
+-->
+  </files>
+</package>

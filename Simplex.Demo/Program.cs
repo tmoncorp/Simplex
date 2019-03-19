@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Linq;
 using Tmon.Simplex;
+using Tmon.Simplex.Store;
 
 namespace Tmon.Simplex.Demo.Actions
 {
@@ -10,7 +11,7 @@ namespace Tmon.Simplex.Demo.Actions
         static void Main(string[] args)
         {
             Simplex.Initialize(logger: new SimpleLogger(text => Console.WriteLine(text)));
-            var Store = Simplex.GetStore<MyActionSet>().ToDisposableStore("subscription-id");
+            var Store = (Simplex.GetStore<MyActionSet>() as Store<MyActionSet>).ToDisposableStore("subscription-id");
             
             Store.Subscribe(
                 action: set => set.GetInteger,

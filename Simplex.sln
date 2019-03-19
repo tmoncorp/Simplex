@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplex.Android", "Simplex.Android\Simplex.Android.csproj", "{65085DD4-2255-46E2-87AB-3D200C626AC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simplex.Core", "Simplex.Core\Simplex.Core.csproj", "{789157CB-75B1-452E-A614-5FABEC48DBFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplex.Core", "Simplex.Core\Simplex.Core.csproj", "{789157CB-75B1-452E-A614-5FABEC48DBFA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplex.iOS", "Simplex.iOS\Simplex.iOS.csproj", "{E71F3053-056C-4381-9638-048ED73BDFF6}"
 EndProject
@@ -14,8 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simplex.UWP", "Simplex.UWP\Simplex.UWP.csproj", "{BA5934AE-CC11-4663-807B-8687E7530DAB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simplex.Demo", "Simplex.Demo\Simplex.Demo.csproj", "{60375159-118D-4094-A647-0EFFD7958491}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Simplex.Sample", "Simplex.Sample", "{92342252-9F5F-4CF5-8A83-8BBB1F01E400}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -391,5 +389,28 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8CC8F3C1-5607-4B85-BA26-C8456F07D90C}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+		$0.VersionControlPolicy = $3
+		$0.TextStylePolicy = $4
+		$4.inheritsSet = null
+		$4.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $5
+		$5.scope = text/x-csharp
+		$0.TextStylePolicy = $6
+		$6.FileWidth = 80
+		$6.TabsToSpaces = True
+		$6.scope = text/plain
+		$0.TextStylePolicy = $7
+		$7.inheritsSet = null
+		$7.scope = application/xml
+		$0.XmlFormattingPolicy = $8
+		$8.scope = application/xml
+		version = 1.1.3
+		description = Soc framework.
 	EndGlobalSection
 EndGlobal

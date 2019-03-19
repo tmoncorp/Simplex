@@ -12,6 +12,16 @@
     <RootNamespace>Tmon.Simplex.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>Tmon.Simplex</AssemblyName>
+    <PackageId>Simplex.iOS</PackageId>
+    <Authors>Tmon mobile labs</Authors>
+    <Owners>Tmon Inc.</Owners>
+    <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
+    <Title>Simplex.iOS</Title>
+    <Description>Simplex for iOS</Description>
+    <Summary>Soc framework.</Summary>
+    <ReleaseVersion>1.1.3</ReleaseVersion>
+    <PackageVersion>1.0.1</PackageVersion>
+    <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,12 +35,14 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -39,8 +51,11 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="4.0.0" />
-    <PackageReference Include="System.Reactive.Linq" Version="4.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Interfaces">
+      <Version>4.1.3</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

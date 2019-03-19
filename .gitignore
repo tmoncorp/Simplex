@@ -263,3 +263,13 @@ __pycache__/
 /.recommenders/index/http___download_eclipse_org_recommenders_models_photon_
 /.recommenders/
 /Simplex.kotlin
+
+\.DS_Store
+
+Nuget/nupkg/deleteNugetPkg\.sh
+
+Nuget/nupkg/pushNugetPkg \.sh
+
+Test/readme\.txt
+
+Test/Test\.nuproj

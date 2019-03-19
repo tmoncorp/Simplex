@@ -6,12 +6,13 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Tmon.Simplex.Demo</AssemblyName>
     <RootNamespace>Tmon.Simplex.Demo</RootNamespace>
+    <ReleaseVersion>1.1.3</ReleaseVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     
-    <PackageReference Include="System.Reactive" Version="4.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
   </ItemGroup>
 
   <ItemGroup>

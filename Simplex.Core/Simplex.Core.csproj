@@ -9,12 +9,31 @@
     <Version>1.1.2</Version>
     <Company>Tmon</Company>
     <Authors>Tmon mobile labs</Authors>
+    <ReleaseVersion>1.1.3</ReleaseVersion>
+    <PackageId>Tmon.Simplex.Core</PackageId>
+    <Owners>Tmon Inc.</Owners>
+    <Title>Tmon.Simplex.Core</Title>
+    <Description>Simplex core api sets.</Description>
+    <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
+    <Summary>Soc framework</Summary>
+    <PackageVersion>1.1.3</PackageVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType></DebugType>
+    <NoStdLib>true</NoStdLib>
+
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <NoStdLib>false</NoStdLib>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="4.0.0" />
-    <PackageReference Include="System.Reactive.Interfaces" Version="4.0.0" />
-    <PackageReference Include="System.Reactive.Linq" Version="4.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Interfaces" Version="4.1.3" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.1.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Simplex.Core.nuspec" />
+  </ItemGroup>
 </Project>
