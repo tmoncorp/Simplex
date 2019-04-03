@@ -10,13 +10,13 @@
     <Product>Tmon.Simplex.XamarinForms</Product>
     <AssemblyName>Tmon.Simplex.XamarinForms</AssemblyName>
     <RootNamespace>Tmon.Simplex</RootNamespace>
-    <ReleaseVersion>1.1.3</ReleaseVersion>
+    <ReleaseVersion>1.1.4</ReleaseVersion>
     <Owners>Tmon Inc.</Owners>
     <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
     <Summary>Soc framework</Summary>
     <Title>Tmon.Simplex.XamarinForms</Title>
     <Description>Simplex hepler for xamarin forms</Description>
-    <PackageVersion>1.1.3</PackageVersion>
+    <PackageVersion>1.1.4</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

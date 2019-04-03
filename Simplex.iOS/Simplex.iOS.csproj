@@ -19,8 +19,8 @@
     <Title>Simplex.iOS</Title>
     <Description>Simplex for iOS</Description>
     <Summary>Soc framework.</Summary>
-    <ReleaseVersion>1.1.3</ReleaseVersion>
-    <PackageVersion>1.0.1</PackageVersion>
+    <ReleaseVersion>1.1.4</ReleaseVersion>
+    <PackageVersion>1.0.2</PackageVersion>
     <PackOnBuild>true</PackOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

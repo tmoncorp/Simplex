@@ -9,14 +9,14 @@
     <Version>1.1.2</Version>
     <Company>Tmon</Company>
     <Authors>Tmon mobile labs</Authors>
-    <ReleaseVersion>1.1.3</ReleaseVersion>
+    <ReleaseVersion>1.1.4</ReleaseVersion>
     <PackageId>Tmon.Simplex.Core</PackageId>
     <Owners>Tmon Inc.</Owners>
     <Title>Tmon.Simplex.Core</Title>
     <Description>Simplex core api sets.</Description>
     <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
     <Summary>Soc framework</Summary>
-    <PackageVersion>1.1.3</PackageVersion>
+    <PackageVersion>1.1.5</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

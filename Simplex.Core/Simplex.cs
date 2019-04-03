@@ -23,6 +23,18 @@ namespace Tmon.Simplex
         public static bool IsInitialized { get; private set; }
 
         /// <summary>
+        /// Initialize() 호출 이전 상태로 초기화 합니다.  
+        /// </summary>
+        public static void Clear()
+        {
+            Store = null;
+            Logger = null;
+            MainThreadScheduler = null;
+            ExceptionSubject = null;
+            IsInitialized = false;
+        }
+
+        /// <summary>
         /// Simplex에서 사용할 환경값들을 설정합니다.
         /// 이 메소드는 반드시 ActionStore의 인스턴스를 조회하기 전에 실행되어야 합니다.
         /// 단 한번만 호출되어야 하며 여러번 호출시 예외가 발생됩니다.
@@ -40,9 +52,11 @@ namespace Tmon.Simplex
             int actionTimeoutMilliseconds = 10000,
             ILogger logger = null)
         {
-            if (IsInitialized)
-                throw new InvalidOperationException(
-                    message: $"{Store.GetType().FullName} 타입용으로 이미 초기화 되어 있습니다.");
+            if (IsInitialized && Store != null)
+            {
+                logger.Write($"{Store.GetType().FullName} 타입용으로 이미 초기화 되어 있습니다.");
+                return;
+            }
 
             MainThreadScheduler = mainThreadScheduler;
             DefaultActionTimeout = TimeSpan.FromMilliseconds(actionTimeoutMilliseconds);
@@ -105,11 +119,11 @@ namespace Tmon.Simplex
             if (Store == null)
                 Store = new Store<TActionBinderSet>();
 
-            if (Store.GetType() == typeof(Store<>).MakeGenericType(typeof(TActionBinderSet)))
-                return (Store<TActionBinderSet>)Store;
-            else
+            if (Store.GetType() != typeof(Store<>).MakeGenericType(typeof(TActionBinderSet)))
                 throw new InvalidCastException(
                     $"{Store.GetType()} 타입의 ActionStore를 {typeName}으로 형변환 할 수 없습니다.");
+            
+            return (Store<TActionBinderSet>)Store;
         }
 
         /// <summary>
