@@ -58,6 +58,12 @@ namespace Tmon.Simplex.XamarinForms.Helpers
                     p.RemoveBinding(BindableObject.BindingContextProperty);
                     p.BindingContext = null;
                 }
+
+                //직접 IActoinSubscriber인 경우
+                if (p is IActionSubscriber pageSubscriber && p.BindingContext == null)
+                {
+                    pageSubscriber.Unsubscribe();
+                }
             });
         }
 

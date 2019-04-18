@@ -21,11 +21,11 @@ namespace Tmon.Simplex.Store
     {
         protected TActionBinderSet Actions { get; } = new TActionBinderSet();
 
-        private readonly ConcurrentDictionary<string, object> observableSources;
+        private readonly ConcurrentDictionary<string, object> _observableSources;
 
         internal Store()
         {
-            observableSources = new ConcurrentDictionary<string, object>();
+            _observableSources = new ConcurrentDictionary<string, object>();
         }
         
         public void Dispatch<TAction, TResult>(
@@ -66,7 +66,7 @@ namespace Tmon.Simplex.Store
             where TAction : IAction<TResult>
             => SubscribeInner(action, onNext, observable, channel, observeOnMainThread, preventClone);
 
-        private IDisposable SubscribeInner<TAction, TResult>(
+        protected virtual IDisposable SubscribeInner<TAction, TResult>(
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             Action<TResult> onNext,
             Func<IObservable<TResult>, IObservable<TResult>> observable = null,
@@ -121,7 +121,7 @@ namespace Tmon.Simplex.Store
                 .Subscribe(onNext);
         }
         
-        protected void DispatchInner<TAction, TParam, TResult>(
+        protected virtual void DispatchInner<TAction, TParam, TResult>(
             Func<TActionBinderSet, IActionBinder<TAction, TResult>> action,
             TParam parameter,
             Func<TAction, Channel> channel = null,
@@ -199,7 +199,7 @@ namespace Tmon.Simplex.Store
         {
             // Default채널의 Id를 키로 등록한다.
             var key = GetDefaultChannel(action).Id;
-            return (Subject<(Channel, TResult)>)observableSources.GetOrAdd(key, new Subject<(Channel, TResult)>());
+            return (Subject<(Channel, TResult)>)_observableSources.GetOrAdd(key, new Subject<(Channel, TResult)>());
         }
 
         private void ValidateChannelId<TResult>(IAction<TResult> action)

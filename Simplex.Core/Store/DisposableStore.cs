@@ -73,7 +73,7 @@ namespace Tmon.Simplex.Store
         /// 구독이 등록될때 발생하는 삭제패턴(IDisposable)객체를 관리 목록에 등록합니다.
         /// 관리목록은 모든 관리형 스토어에 공유되며, 삭제 패턴객체는 관리 스토어 식별자 별로 관리됩니다.
         /// </summary>
-        /// <param name="disposables">삭제패턴 객체</param>
+        /// <param name="disposable">삭제패턴 객체</param>
         /// <returns>삭제패턴 객체</returns>
         private IDisposable AddDisposable(IDisposable disposable)
         {
