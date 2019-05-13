@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -16,7 +16,8 @@
     <Description>Simplex core api sets.</Description>
     <PackageProjectUrl>https://github.com/tmoncorp/Simplex</PackageProjectUrl>
     <Summary>Soc framework</Summary>
-    <PackageVersion>1.1.5</PackageVersion>
+    <PackageVersion>1.1.6</PackageVersion>
+    <PackageReleaseNotes>iOS 디바이스 실행 오류 수정</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

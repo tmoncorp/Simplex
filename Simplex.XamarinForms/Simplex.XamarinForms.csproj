@@ -16,7 +16,7 @@
     <Summary>Soc framework</Summary>
     <Title>Tmon.Simplex.XamarinForms</Title>
     <Description>Simplex hepler for xamarin forms</Description>
-    <PackageVersion>1.1.4</PackageVersion>
+    <PackageVersion>1.1.5</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
